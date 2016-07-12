@@ -1,0 +1,1 @@
+Do not publish this folder online as part of the open source release. This folder merely contains instructions for how to publish and what files to ignore/modify before uploading a new source package.

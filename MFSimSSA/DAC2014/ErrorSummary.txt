@@ -1,0 +1,21 @@
+Seed for DAC 2014 error selection: 1387430847
+4 errors were selected randomly from B4_Protein_Mix_Levels_5:
+Error 1: MIX61
+Error 2: MIX103
+Error 3: MIX142
+Error 4: MIX168
+
+
+The following represents the above errors with schedules as encountered in their individual recovery graphs.
+Error 1: MIX61(mix): [91, 94), Detecting Module.
+	Occurred while executing DAC2014/B4_Protein_Mix_Levels_5_RecoverFromError_0.dot
+	Last TS executed: 122
+Error 2: MIX103(mix): [95, 98), Detecting Module.
+	Occurred while executing DAC2014/B4_Protein_Mix_Levels_5_RecoverFromError_1.dot
+	Last TS executed: 126
+Error 3: MIX142(mix): [91, 94), Detecting Module.
+	Occurred while executing DAC2014/B4_Protein_Mix_Levels_5_RecoverFromError_2.dot
+	Last TS executed: 117
+Error 4: MIX168(mix): [52, 55), Detecting Module.
+	Occurred while executing DAC2014/B4_Protein_Mix_Levels_5_RecoverFromError_3.dot
+	Last TS executed: 83

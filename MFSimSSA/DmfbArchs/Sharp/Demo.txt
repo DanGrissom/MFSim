@@ -1,0 +1,37 @@
+ARCHNAME (Arch_15_19_B3)
+
+DIM (200, 200)
+EXTERNAL (DETECT, 5, 5, 195, 195)
+
+// INPUTS
+// 1 Sample input
+Input (north, 2, 2, DsS)
+
+// 8 Base inputs
+Input (north, 4, 2, DsB)
+Input (north, 6, 2, DsB)
+Input (north, 8, 2, DsB)
+Input (north, 10, 2, DsB)
+Input (north, 12, 2, DsB)
+Input (north, 14, 2, DsB)
+Input (north, 16, 2, DsB)
+Input (north, 18, 2, DsB)
+
+// 8 Reagent inputs
+Input (west, 2, 2, DsR)
+Input (west, 4, 2, DsR)
+Input (west, 6, 2, DsR)
+Input (west, 8, 2, DsR)
+Input (west, 10, 2, DsR)
+Input (west, 12, 2, DsR)
+Input (west, 14, 2, DsR)
+Input (west, 16, 2, DsR)
+
+// 1 Output
+Output (west, 18, 0, output)
+
+// Wash input/output
+Input (north, 20, 0, wash, true)
+Output (west, 20, 0, waste, true)
+FREQ (100)
+TIMESTEP (1)

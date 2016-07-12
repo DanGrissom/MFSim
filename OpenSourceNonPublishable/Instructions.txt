@@ -1,0 +1,12 @@
+Testing code
+	- Remove test.h/test.cc
+	- test.h ref in main.cc
+	- Remove biocode_test.h/biocode_test.cc
+	- biocode_test.h ref in main.cc
+
+Calvin/Skyler's RBS Code
+	- Remove Skycal_router.h/skycal_router.cc
+	- Remove RoutingBasedSynthesis enum refs
+		- enums.h
+		- compatibility_check.cc
+		- command_line.cc

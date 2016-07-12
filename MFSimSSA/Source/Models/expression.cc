@@ -1,0 +1,395 @@
+/*------------------------------------------------------------------------------*
+ *                       (c)2016, All Rights Reserved.     						*
+ *       ___           ___           ___     									*
+ *      /__/\         /  /\         /  /\    									*
+ *      \  \:\       /  /:/        /  /::\   									*
+ *       \  \:\     /  /:/        /  /:/\:\  									*
+ *   ___  \  \:\   /  /:/  ___   /  /:/~/:/        								*
+ *  /__/\  \__\:\ /__/:/  /  /\ /__/:/ /:/___     UCR DMFB Synthesis Framework  *
+ *  \  \:\ /  /:/ \  \:\ /  /:/ \  \:\/:::::/     www.microfluidics.cs.ucr.edu	*
+ *   \  \:\  /:/   \  \:\  /:/   \  \::/~~~~ 									*
+ *    \  \:\/:/     \  \:\/:/     \  \:\     									*
+ *     \  \::/       \  \::/       \  \:\    									*
+ *      \__\/         \__\/         \__\/    									*
+ *-----------------------------------------------------------------------------*/
+/*---------------------------Implementation Details-----------------------------*
+ * Source: expression.cc														*
+ * Original Code Author(s): Dan Grissom											*
+ * Original Completion/Release Date: April 1, 2014								*
+ *																				*
+ * Details: N/A																	*
+ *																				*
+ * Revision History:															*
+ * WHO		WHEN		WHAT													*
+ * ---		----		----													*
+ * FML		MM/DD/YY	One-line description									*
+ *-----------------------------------------------------------------------------*/
+#include "../../Headers/Models/expression.h"
+
+/////////////////////////////////////////////////////////////////////
+// Constructors
+/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+// Creating an expression that compares the readings from two sensors.
+/////////////////////////////////////////////////////////////////////
+Expression::Expression(AssayNode *s1, ExOperationType ot, AssayNode *s2)
+{
+	{	// Sanity check: Must be proper operation type
+		if (!(ot == OP_GT || ot == OP_LT || ot == OP_GoE || ot == OP_LoE || ot == OP_EQUAL) || !s1 || !s2)
+		{
+			stringstream msg;
+			msg << "ERROR. >, <, <=, >=, == operations allowed for a sensor-sensor comparison. Must be valid sensors." << ends;
+			claim(false, &msg);
+		}
+	}
+	operationType = ot;
+	operands = NULL;
+	operandType = OP_TWO_SENSORS;
+	constant = 0;
+	sensor1 = s1;
+	sensor2 = s2;
+	unconditionalParent = NULL;
+}
+/////////////////////////////////////////////////////////////////////
+// Creating an expression that compares the reading from a sensor to
+// a constant value
+/////////////////////////////////////////////////////////////////////
+Expression::Expression(AssayNode *s1, ExOperationType ot, double c)
+{
+	{	// Sanity check: Must be proper operation type
+		if (!(ot == OP_GT || ot == OP_LT || ot == OP_GoE || ot == OP_LoE || ot == OP_EQUAL)	|| !s1)
+		{
+			stringstream msg;
+			msg << "ERROR. >, <, <=, >=, == operations allowed for a sensor-sensor comparison. Must be valid sensors." << ends;
+			claim(false, &msg);
+		}
+	}
+	operationType = ot;
+	operands = NULL;
+	operandType = OP_ONE_SENSOR;
+	constant = c;
+	sensor1 = s1;
+	sensor2 = NULL;
+	unconditionalParent = NULL;
+}
+/////////////////////////////////////////////////////////////////////
+// Creating an expression that performs a NOT operation
+/////////////////////////////////////////////////////////////////////
+Expression::Expression(Expression *notExp)
+{
+	operationType = OP_NOT;
+	operands = new vector<Expression*>();
+	operands->push_back(notExp);
+	operandType = OP_EXP;
+	constant = 0;
+	sensor1 = NULL;
+	sensor2 = NULL;
+	unconditionalParent = NULL;
+}
+
+/////////////////////////////////////////////////////////////////////
+// Creating an expression that performs an AND or OR operation
+/////////////////////////////////////////////////////////////////////
+Expression::Expression(ExOperationType andOr)
+{
+	{	// Sanity check: Must be proper operation type
+		stringstream msg;
+		msg << "ERROR. Only AND, OR operations allowed for this expression." << ends;
+		claim(andOr == OP_AND || andOr == OP_OR, &msg);
+	}
+	operationType = andOr;
+	operands = new vector<Expression*>();
+	operandType = OP_EXP;
+	constant = 0;
+	sensor1 = NULL;
+	sensor2 = NULL;
+	unconditionalParent = NULL;
+}
+
+/////////////////////////////////////////////////////////////////////
+// Creating an expression is either unconditionally true or false.
+// Must pass the unconditional parent from which to branch from
+/////////////////////////////////////////////////////////////////////
+Expression::Expression(DAG *unconPar, bool unconditional)
+{
+	if (unconditional)
+		operandType = OP_TRUE;
+	else
+		operandType = OP_FALSE;
+	//operands = new vector<Expression*>();
+	operationType = OP_UNCOND;
+	constant = 0;
+	sensor1 = NULL;
+	sensor2 = NULL;
+	unconditionalParent = unconPar;
+}
+/////////////////////////////////////////////////////////////////////
+// Destructor.
+/////////////////////////////////////////////////////////////////////
+Expression::~Expression()
+{
+	if (operands)
+	{
+		// TODO: Traverse and do recursive delete...MAYBE
+		//for (int i = 0; i < operands->size(); i++)
+			//recursiveDelete();
+
+		operands->clear();
+		delete operands;
+	}
+	if (sensor1)
+		sensor1 = NULL;
+	if (sensor2)
+		sensor2 = NULL;
+}
+/////////////////////////////////////////////////////////////////////
+// Methods
+/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+// Add an operand to an AND/OR statement.
+/////////////////////////////////////////////////////////////////////
+void Expression::addOperand(Expression *op)
+{
+	{	// Sanity check: Must be AND/OR to add operand
+		stringstream msg;
+		msg << "ERROR. Only AND, OR operations allowed to add more operands." << ends;
+		claim(operationType == OP_AND || operationType == OP_OR, &msg);
+	}
+	{	// Sanity check: Expression must not be NULL
+		stringstream msg;
+		msg << "ERROR. Expression is not valid." << ends;
+		claim(op, &msg);
+	}
+	operands->push_back(op);
+}
+
+/////////////////////////////////////////////////////////////////////
+// Evaluates if the expression is valid.  That is, if all the leaves
+// actually evaluate to a true or false (the leaves all compare
+// sensor/constant values).
+/////////////////////////////////////////////////////////////////////
+bool Expression::isValidExpression()
+{
+	return recursiveValidate(this);
+}
+bool Expression::recursiveValidate(Expression *e)
+{
+	if (!e)
+		return false;
+	if (e->operationType == OP_GT || e->operationType == OP_LT
+			|| e->operationType == OP_GoE || e->operationType == OP_LoE
+			|| e->operationType == OP_EQUAL	|| e->operationType == OP_UNCOND)
+		return true;
+	else if (e->operationType == OP_AND && e->operationType == OP_OR && e->operands->size() <= 1)
+		return false;
+	else if (e->operands->size() == 0) // e->operationType == OP_NOT
+			return false;
+
+	bool isValid = true;
+	for (int i = 0; i < e->operands->size(); i++)
+	{
+		isValid = isValid && recursiveValidate(e->operands->at(i));
+		if (!isValid)
+			return false;
+	}
+	return true;
+}
+/////////////////////////////////////////////////////////////////////
+// Prints the boolean expression.
+/////////////////////////////////////////////////////////////////////
+string Expression::printExpression()
+{
+	stringstream ss;
+	recursivePrint(this, &ss);
+	return ss.str();
+}
+void Expression::recursivePrint(Expression *e, stringstream *ss)
+{
+	if (!e)
+	{
+		*ss << "(No Condition)";
+		return;
+	}
+
+	*ss << "(";
+	if (e->operationType == OP_UNCOND)
+	{
+		if (e->operandType == OP_TRUE)
+			*ss << "Unconditional TRUE";
+		else if (e->operandType == OP_FALSE)
+			*ss << "Unconditional FALSE";
+	}
+	else if (e->operationType == OP_GT || e->operationType == OP_LT
+			|| e->operationType == OP_GoE || e->operationType == OP_LoE || e->operationType == OP_EQUAL)
+	{
+		*ss << e->sensor1->GetName() << "_READ = " << e->sensor1->GetReading();
+		if (e->operationType == OP_GT)
+			*ss << " > ";
+		else if (e->operationType == OP_LT)
+			*ss << " < ";
+		else if (e->operationType == OP_GoE)
+			*ss << " >= ";
+		else if (e->operationType == OP_LoE)
+			*ss << " <= ";
+		else if (e->operationType == OP_EQUAL)
+			*ss << " = ";
+		else
+			*ss << " ??? ";
+
+		if (e->operandType == OP_ONE_SENSOR)
+			*ss << e->constant;
+		else if (e->operandType == OP_TWO_SENSORS)
+			*ss << e->sensor2->GetName() << "_READ = " << e->sensor2->GetReading();
+		else
+			*ss << "---ERROR---";
+	}
+	else if (e->operationType == OP_AND || e->operationType == OP_OR)
+	{
+		for (int i = 0; i < e->operands->size(); i++)
+		{
+			recursivePrint(e->operands->at(i), ss);
+			if (i < e->operands->size()-1 && e->operationType == OP_AND)
+				*ss << " AND ";
+			else if (i < e->operands->size()-1 && e->operationType == OP_OR)
+				*ss << " OR ";
+		}
+
+	}
+	else if (e->operationType == OP_NOT)
+	{
+		*ss << " NOT";
+		recursivePrint(e->operands->front(), ss);
+	}
+	else
+		*ss << "---ERROR---";
+	*ss << ")";
+}
+
+/////////////////////////////////////////////////////////////////////
+// Evaluates the expression and returns the value.
+/////////////////////////////////////////////////////////////////////
+bool Expression::evaluateExpression()
+{
+	return recursiveEvaluate(this);
+}
+bool Expression::recursiveEvaluate(Expression *e)
+{
+	{	// Sanity check: Expression must be valid
+		stringstream msg;
+		msg << "ERROR. Expression not valid." << ends;
+		claim(e->isValidExpression(), &msg);
+	}
+
+	if (e->operationType == OP_UNCOND)
+	{
+		if (e->operandType == OP_TRUE)
+			return true;
+		else if (e->operandType == OP_FALSE)
+			return false;
+	}
+	else if (e->operationType == OP_GT || e->operationType == OP_LT
+			|| e->operationType == OP_GoE || e->operationType == OP_LoE || e->operationType == OP_EQUAL)
+	{
+		{	// Sanity check: Detect nodes must be done
+			stringstream msg;
+			msg << "ERROR. Detect sensor " << e->sensor1->GetName() << " status must be 'complete'." << endl;
+			claim(e->sensor1->GetStatus() == COMPLETE , &msg);
+			if (e->sensor2)
+			{
+				stringstream msg2;
+				msg2 << "ERROR. Detect sensor " << e->sensor2->GetName() << " status must be 'complete'." << endl;
+				claim(e->sensor2->GetStatus() == COMPLETE , &msg2);
+			}
+		}
+
+		double lhs = e->sensor1->GetReading();
+		double rhs;
+		if (e->operandType == OP_ONE_SENSOR)
+			rhs = e->constant;
+		else if (e->operandType == OP_TWO_SENSORS)
+			rhs = e->sensor2->GetReading();
+
+		if (e->operationType == OP_GT)
+			return lhs > rhs;
+		else if (e->operationType == OP_LT)
+			return lhs < rhs;
+		else if (e->operationType == OP_GoE)
+			return lhs >= rhs;
+		else if (e->operationType == OP_LoE)
+			return lhs <= rhs;
+		else if (e->operationType == OP_EQUAL)
+			return lhs == rhs;
+	}
+	else if (e->operationType == OP_AND)
+	{
+		bool eval = true;
+		for (int i = 0; i < e->operands->size(); i++)
+			eval = eval && recursiveEvaluate(e->operands->at(i));
+		return eval;
+	}
+	else if (e->operationType == OP_OR)
+	{
+		bool eval = false;
+		for (int i = 0; i < e->operands->size(); i++)
+			eval = eval || recursiveEvaluate(e->operands->at(i));
+		return eval;
+	}
+	else if (e->operationType == OP_NOT)
+	{
+		return !(recursiveEvaluate(e->operands->front()));
+	}
+	else
+	{	// Sanity check: Detect nodes must be done
+		stringstream msg;
+		msg << "ERROR. Unknown operation type" << ends;
+		claim(false , &msg);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////
+// Gets the unique DAG parents for this expression
+/////////////////////////////////////////////////////////////////////
+void Expression::getParentDags(list<DAG *> *parents)
+{
+	//parents->clear();
+	recursiveGetParents(this, parents);
+}
+void Expression::recursiveGetParents(Expression *e, list<DAG *> *parents)
+{
+	if (e->operationType == OP_GT || e->operationType == OP_LT
+			|| e->operationType == OP_GoE || e->operationType == OP_LoE || e->operationType == OP_EQUAL)
+	{
+		parents->remove(e->sensor1->GetDAG());
+		parents->push_back(e->sensor1->GetDAG());
+
+		if (e->operandType == OP_TWO_SENSORS)
+		{
+			parents->remove(e->sensor2->GetDAG());
+			parents->push_back(e->sensor2->GetDAG());
+		}
+	}
+	else if (e->operationType != OP_UNCOND)
+	{
+		for (int i = 0; i < e->operands->size(); i++)
+			recursiveGetParents(e->operands->at(i), parents);
+	}
+	else	// OP_UNCOND
+	{
+		parents->remove(e->unconditionalParent);
+		parents->push_back(e->unconditionalParent);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+

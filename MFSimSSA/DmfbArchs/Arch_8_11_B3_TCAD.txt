@@ -1,0 +1,21 @@
+ARCHNAME (Arch_8_11_B3)
+DIM (8, 11)
+
+
+// Zero spacing between modules vertically
+// Top
+EXTERNAL (DETECT, 2, 2, 5, 4)
+//Bottom
+EXTERNAL (DETECT, 2, 6, 5, 8)
+
+
+
+Input (west, 3, 2, DsB)
+Input (west, 5, 2, DsS)
+Input (west, 7, 2, DsB)
+Input (east, 3, 2, DsR)
+Output (east, 5, 0, output)
+Input (east, 7, 2, DsR)
+
+FREQ (100)
+TIMESTEP (1)
