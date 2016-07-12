@@ -1,0 +1,13 @@
+1) Just download latest MinGW-w64 from: http://sourceforge.net/projects/mingw-w64/
+	- Click Files->Toolchains targetting Win64->PersonalBuilds->mingw-builds->5.1.0 (or latest)->threads-posix->seh
+	- Download the 7z file and extract contents to "C:\MinGW64"
+
+2) When creating new project, make sure to uncheck "Display compatible toolchains only"
+
+Look in C/C++ Environment and make sure are (should be auto unless had older version of MinGW):
+MINGW_HOME is: C:\MinGW64
+PATH contains: ${MINGW_HOME}\bin;
+
+BE CAREFUL, if value is set in Windows Environmental Variables, it might override to previous MinGW version or wrong folder
+
+MSYS_HOME NOT NEEDED: (C:\MinGW\msys\1.0)
