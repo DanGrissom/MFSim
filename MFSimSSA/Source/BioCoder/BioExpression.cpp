@@ -80,7 +80,7 @@ BioExpression::BioExpression(BioExpression *notExp)
 	operationType = OP_NOT;
 	operands = new std::vector<BioExpression*>();
 	operands->push_back(notExp);
-	operandType = OP_EXP;
+	operandType = OP_SUB_EXP;
 	constant = 0;
 	sensor1 = "";
 	sensor2 = "";
@@ -99,7 +99,7 @@ BioExpression::BioExpression(ExOperationType andOr)
 	}
 	operationType = andOr;
 	operands = new std::vector<BioExpression*>();
-	operandType = OP_EXP;
+	operandType = OP_SUB_EXP;
 	constant = 0;
 	sensor1 = "";
 	sensor2 = "";

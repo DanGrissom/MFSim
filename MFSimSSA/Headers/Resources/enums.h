@@ -33,8 +33,8 @@ enum KamerNodeType { OE, IE, GE, RW };
 enum ModuleDeltaType { TS_MDT, C_MDT }; // Warning: Changing this order requires a change in the visualizer's parser
 
 // Conditional Execution Types
-enum ExOperationType { OP_GT, OP_GoE, OP_LT, OP_LoE, OP_EQUAL, OP_NOT, OP_AND, OP_OR, OP_UNCOND}; // Expression operation type
-enum ExOperandType { OP_EXP, OP_ONE_SENSOR, OP_TWO_SENSORS, OP_TRUE, OP_FALSE}; // Expression operand type
+enum ExOperationType { OP_GT, OP_GoE, OP_LT, OP_LoE, OP_EQUAL, OP_NOT, OP_AND, OP_OR, OP_UNCOND}; // Expression operation type - IF CHANGE, see FileOut::RecursiveExpressionGen()
+enum ExOperandType { OP_SUB_EXP, OP_RUN_COUNT, OP_ONE_SENSOR, OP_TWO_SENSORS, OP_TRUE, OP_FALSE}; // Expression operand type - IF CHANGE, see FileOut::RecursiveExpressionGen()
 enum DagStatus { UN_RUN, RUNNING, RUN_FINISHED, CAN_RUN_AGAIN };
 
 // Common benchmark (does not include every possible benchmark, just common ones)

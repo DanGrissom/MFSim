@@ -713,7 +713,8 @@ CFG * BiocodeTest::Create_Conditional_Demo_CFG(bool outputBiocoderGraphs)
 
 	// Generate CFG from Biocoder and output CFG and all DAGs
 	CFG *cfg = BioSys->GetDmfbExecutableCFG();
-	cfg->OutputGraphFile("BC_Conditional_CFG", true, true, true);
+	cfg->setName("BC_Conditional_CFG");
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
     cout << "BioCoder Conditional CFG Generated" << endl;
     return cfg;
 }
@@ -848,7 +849,8 @@ CFG * BiocodeTest::Create_Conditional_With_Transfer_Droplets_Demo_CFG(bool outpu
 
 	// Generate CFG from Biocoder and output CFG and all DAGs
 	CFG *cfg = BioSys->GetDmfbExecutableCFG();
-	cfg->OutputGraphFile("BC_Conditional_TransferDrops_CFG", true, true, true);
+	cfg->setName("BC_Conditional_TransferDrops_CFG");
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
     cout << "BioCoder Conditional w/ Transfer Droplets CFG Generated" << endl;
     return cfg;
 }
@@ -919,7 +921,8 @@ CFG * BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(boo
 
 	// Generate CFG from Biocoder and output CFG and all DAGs
 	CFG *cfg = BioSys->GetDmfbExecutableCFG();
-	cfg->OutputGraphFile("BC_Simple_Conditional_TransferDrops_CFG", true, true, true);
+	cfg->setName("BC_Simple_Conditional_TransferDrops_CFG");
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
     cout << "BioCoder Simple Conditional w/ Transfer Droplets CFG Generated" << endl;
     return cfg;
 }
@@ -1005,7 +1008,8 @@ CFG * BiocodeTest::Create_Conditional_B2_InVitroDiag_CFG(int numSamples, int num
 
 	// Generate CFG from Biocoder and output CFG and all DAGs
 	CFG *cfg = BioSys->GetDmfbExecutableCFG();
-	cfg->OutputGraphFile("BC_Conditional_B2_InVitro_CFG", true, true, true);
+	cfg->setName("BC_Conditional_B2_InVitro_CFG");
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
 	cout << "BioCoder Conditional B2_InVitroDiag(Samples=" << numSamples << ", Reagents=" << numReagents /*<< ", Detectors= " << numDetectors*/ << ") CFG Generated" << endl;
 	return cfg;
 }
@@ -1356,7 +1360,8 @@ CFG * BiocodeTest::Create_Conditional_B3_Protein_FaultTolerant_CFG(double mult, 
 
 	// Generate CFG from Biocoder and output CFG and all DAGs
 	CFG *cfg = BioSys->GetDmfbExecutableCFG();
-	cfg->OutputGraphFile("BC_Conditional_B3_Protein_FaultTolerant_CFG", true, true, true);
+	cfg->setName("BC_Conditional_B3_Protein_FaultTolerant_CFG");
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
 
 	// Cleanup
 	delete tiRmsL2;
@@ -1564,7 +1569,7 @@ static CFG *Create_Conditional_Probabilistic_PCR_CFG(double dnaThreshold, bool o
 	Volume dropVol = begin->vol(10, UL);
 	Time time = begin->time(45, SECS);
 
-	cout<<"Inital Dispenses" <<endl;
+	//cout<<"Initial Dispenses" <<endl;
 
 	Container tube1 = begin->new_container(STERILE_MICROFUGE_TUBE2ML);
 	string initalTransferOut;
@@ -1805,7 +1810,7 @@ CFG * BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(double volumeT
 	Time minutes5 = begin->time(5, MINS);
 	Time seconds1 = begin->time(1,SECS);
 
-	cout<<"Inital Dispenses" <<endl;
+	//cout<<"Initial Dispenses" <<endl;
 
 	Container tube = begin->new_container(STERILE_MICROFUGE_TUBE2ML);
 	Container tube1 = begin->new_container(STERILE_MICROFUGE_TUBE2ML);
@@ -1842,7 +1847,7 @@ CFG * BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(double volumeT
 	{
 		char buffer[25];
 		sprintf(buffer,"ReactantReplenishStep%i",i);
-		cout << buffer <<endl;
+		//cout << buffer <<endl;
 		BioCoder * bioRefresh= BioSys->addBioCoder(buffer);
 		//Fluid Replacement = bioRefresh->new_fluid("ReplacementMix",bioRefresh->vol(100,ML));
 		tube1 = bioRefresh->new_container(STERILE_MICROFUGE_TUBE2ML);
@@ -1881,7 +1886,7 @@ CFG * BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(double volumeT
 	{
 		char buffer[25];
 		sprintf(buffer,"ThermoHeadStep%i",i);
-		cout << buffer <<endl;
+		//cout << buffer <<endl;
 		BioCoder * Thermocycler= BioSys->addBioCoder(buffer);
 
 		tube1 = Thermocycler->new_container(STERILE_MICROFUGE_TUBE2ML);
@@ -1921,7 +1926,7 @@ CFG * BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(double volumeT
 	{
 		char buffer[25];
 		sprintf(buffer,"TailStep%i",i);
-		cout << buffer <<endl;
+		//cout << buffer <<endl;
 
 		BioCoder * tailThermo= BioSys->addBioCoder(buffer);
 		tube1 = tailThermo->new_container(STERILE_MICROFUGE_TUBE2ML);
@@ -1967,7 +1972,7 @@ CFG * BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(double volumeT
 	///////////////////////////////////////////////////////////////////////////////
 	//			Inital CFG controls  Dispense to Initial THermo
 	///////////////////////////////////////////////////////////////////////////////
-	cout <<"Initial CFG"<<endl;
+	//cout <<"Initial CFG"<<endl;
 	BioConditionalGroup *bcg = BioSys->addBioCondGroup();
 
 	BioExpression *e = new BioExpression(begin,true);  //unconditional branches.
@@ -1977,7 +1982,7 @@ CFG * BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(double volumeT
 	///////////////////////////////////////////////////////////////////////////////
 	//			Tail Thermo to Head Thermo Loop
 	///////////////////////////////////////////////////////////////////////////////
-	cout <<"Tail to head"<<endl;
+	//cout <<"Tail to head"<<endl;
 	for(int i = 0 ; i<THERMOCYCLESTEPS-1; ++i )
 	{
 		BioConditionalGroup *bcg = BioSys->addBioCondGroup();
@@ -1989,7 +1994,7 @@ CFG * BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(double volumeT
 	///////////////////////////////////////////////////////////////////////////////
 	//			Refresh Dag to Tail Thermo
 	///////////////////////////////////////////////////////////////////////////////
-	cout <<"Refresh to tail"<<endl;
+	//cout <<"Refresh to tail"<<endl;
 	for(int i = 0 ; i<THERMOCYCLESTEPS-1; ++i )
 	{
 		BioConditionalGroup *bcg = BioSys->addBioCondGroup();
@@ -2002,7 +2007,7 @@ CFG * BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(double volumeT
 	///////////////////////////////////////////////////////////////////////////////
 	//			Head thermo to replenish or tail Thermo
 	///////////////////////////////////////////////////////////////////////////////
-	cout <<"head to tail"<<endl;
+	//cout <<"head to tail"<<endl;
 	for(int i = 0 ; i<THERMOCYCLESTEPS; ++i )
 	{
 		bcg = BioSys->addBioCondGroup();
@@ -2021,7 +2026,8 @@ CFG * BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(double volumeT
 	//			Generate CFG from Biocoder and output CFG and all DAGs
 	///////////////////////////////////////////////////////////////////////////////
 	CFG *cfg = BioSys->GetDmfbExecutableCFG();
-	cfg->OutputGraphFile("BC_Conditional_PCRDropletReplacement_CFG", true, true, true);
+	cfg->setName("BC_Conditional_PCRDropletReplacement_CFG");
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
 	cout << "BioCoder Conditional PCR Droplet Replacement CFG Generated" << endl;
 	return cfg;
 }

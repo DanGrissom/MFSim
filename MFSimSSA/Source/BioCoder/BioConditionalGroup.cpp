@@ -273,7 +273,7 @@ Expression *BioConditionalGroup::recursiveConvert(BioExpression *be, vector<DAG*
 		}
 		return new Expression(Sensor1,be->operationType,Sensor2);
 	}
-	else if(be->operandType==OP_EXP)
+	else if(be->operandType==OP_SUB_EXP)
 	{
 		Expression *newExp = new Expression(be->operationType);
 		for (int i = 0; i < be->operands->size(); i++)

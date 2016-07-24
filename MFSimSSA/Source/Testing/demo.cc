@@ -409,6 +409,7 @@ void Demo::PinMapWireRouteFlow(PinMapType pmt, WireRouteType wrt, int oCap, int 
 CFG * Demo::Create_Conditional_Demo_CFG()
 {
 	CFG *cfg = new CFG();
+	cfg->setName("Conditional_Demo_CFG");
 
 	// DAG 1
 	DAG *dag1 = cfg->AddNewDAG("dag1");
@@ -458,7 +459,7 @@ CFG * Demo::Create_Conditional_Demo_CFG()
 	cg->addNewCondition(outer, dag3);
 
 	cfg->ConstructAndValidateCFG();
-	cfg->OutputGraphFile("Conditional_CFG", true, true, true);
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
 	cout << "Conditional CFG Generated" << endl;
 	return cfg;
 }
@@ -475,6 +476,7 @@ CFG * Demo::Create_FaultTolerant_Split_Demo1_CFG()
 	double secPerTS = .05; //seconds per timestep
 
 	CFG *cfg = new CFG();
+	cfg->setName("Create_FaultTolerant_Split_Demo1_CFG");
 
 	// DAG 1
 	DAG *dag = cfg->AddNewDAG("pcr");
@@ -509,7 +511,7 @@ CFG * Demo::Create_FaultTolerant_Split_Demo1_CFG()
 
 	cfg->convertFTSplits();
 	cfg->ConstructAndValidateCFG();
-	cfg->OutputGraphFile("Conditional_FaultTolerantSplit_Demo1_CFG", true, true, true);
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
 	cout << "Fault-tolerant Split Test 1 CFG Generated" << endl;
 	return cfg;
 }
@@ -524,6 +526,7 @@ CFG * Demo::Create_FaultTolerant_Split_Demo2_CFG()
 	double secPerTS = .05; //seconds per timestep
 
 	CFG *cfg = new CFG();
+	cfg->setName("Create_FaultTolerant_Split_Demo2_CFG");
 
 	// DAG 1
 	DAG *dag = cfg->AddNewDAG("pcr");
@@ -567,7 +570,7 @@ CFG * Demo::Create_FaultTolerant_Split_Demo2_CFG()
 
 	cfg->convertFTSplits();
 	cfg->ConstructAndValidateCFG();
-	cfg->OutputGraphFile("Conditional_FaultTolerantSplit_Demo2_CFG", true, true, true);
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
 	cout << "Fault-tolerant Split Test 2 CFG Generated" << endl;
 	return cfg;
 }

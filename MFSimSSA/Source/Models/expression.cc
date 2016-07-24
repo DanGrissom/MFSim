@@ -26,6 +26,8 @@
  *-----------------------------------------------------------------------------*/
 #include "../../Headers/Models/expression.h"
 
+int Expression::next_id = 1;
+
 /////////////////////////////////////////////////////////////////////
 // Constructors
 /////////////////////////////////////////////////////////////////////
@@ -43,6 +45,7 @@ Expression::Expression(AssayNode *s1, ExOperationType ot, AssayNode *s2)
 			claim(false, &msg);
 		}
 	}
+	id = next_id++;
 	operationType = ot;
 	operands = NULL;
 	operandType = OP_TWO_SENSORS;
@@ -65,6 +68,7 @@ Expression::Expression(AssayNode *s1, ExOperationType ot, double c)
 			claim(false, &msg);
 		}
 	}
+	id = next_id++;
 	operationType = ot;
 	operands = NULL;
 	operandType = OP_ONE_SENSOR;
@@ -78,10 +82,11 @@ Expression::Expression(AssayNode *s1, ExOperationType ot, double c)
 /////////////////////////////////////////////////////////////////////
 Expression::Expression(Expression *notExp)
 {
+	id = next_id++;
 	operationType = OP_NOT;
 	operands = new vector<Expression*>();
 	operands->push_back(notExp);
-	operandType = OP_EXP;
+	operandType = OP_SUB_EXP;
 	constant = 0;
 	sensor1 = NULL;
 	sensor2 = NULL;
@@ -98,9 +103,10 @@ Expression::Expression(ExOperationType andOr)
 		msg << "ERROR. Only AND, OR operations allowed for this expression." << ends;
 		claim(andOr == OP_AND || andOr == OP_OR, &msg);
 	}
+	id = next_id++;
 	operationType = andOr;
 	operands = new vector<Expression*>();
-	operandType = OP_EXP;
+	operandType = OP_SUB_EXP;
 	constant = 0;
 	sensor1 = NULL;
 	sensor2 = NULL;
@@ -108,16 +114,18 @@ Expression::Expression(ExOperationType andOr)
 }
 
 /////////////////////////////////////////////////////////////////////
-// Creating an expression is either unconditionally true or false.
+// Creating an expression that is either unconditionally true or false.
 // Must pass the unconditional parent from which to branch from
 /////////////////////////////////////////////////////////////////////
 Expression::Expression(DAG *unconPar, bool unconditional)
 {
+	id = next_id++;
 	if (unconditional)
 		operandType = OP_TRUE;
 	else
 		operandType = OP_FALSE;
 	//operands = new vector<Expression*>();
+	operands = NULL;
 	operationType = OP_UNCOND;
 	constant = 0;
 	sensor1 = NULL;

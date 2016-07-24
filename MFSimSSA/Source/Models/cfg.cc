@@ -202,6 +202,9 @@ void CFG::OutputGraphFile(string filename, bool outputDAGs, bool color, bool ful
 		}
 	}
 	out<<"}\n";
+
+	// Close file
+	out.close();
 }
 
 ///////////////////////////////////////////////////////////////

@@ -40,6 +40,9 @@ using namespace std;
 #include "../Headers/Models/compiled_cfg.h"
 #include "../Headers/Models/cfg.h"
 
+// TEMPORARY - DTG
+#include "../Headers/Util/file_out.h"
+
 ///////////////////////////////////////////////////////////////////////////////////
 // Main function called when starting program.
 ///////////////////////////////////////////////////////////////////////////////////
@@ -81,10 +84,13 @@ int main(int argc, char **argv)
 			// SSA Dynamic System
 			Synthesis *synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/Testing/Arch_15_19_SampleReagent.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
 			//CFG *cfg = BiocodeTest::Create_Conditional_Demo_CFG(false);									// LS Pass; LEB Pass; RMR-R Pass
-			//CFG *cfg = BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(false);		// LS Pass; LEB Pass; RMR-R Pass
+			CFG *cfg = BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(false);		// LS Pass; LEB Pass; RMR-R Pass
 			//CFG *cfg = BiocodeTest::Create_Conditional_With_Transfer_Droplets_Demo_CFG(false);				// LS Pass; LEB Pass; RMR-R Pass (Merge case); Complete	 	//*Good Example
-			CFG *cfg = BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(.8, false);					// LS Pass; LEB Pass; RMR-R Pass
+			//CFG *cfg = BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(.8, false);					// LS Pass; LEB Pass; RMR-R Pass
 			//CFG *cfg = BiocodeTest::Create_Conditional_Probabilistic_PCR_CFG(.8, false);						// LS Pass; LEB Pass; RMR-R Pass
+
+			FileOut::WriteCfgToFile(cfg, "Output/" + cfg->getName() + ".txt");
+			return 0;
 
 
 			//Synthesis *synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);

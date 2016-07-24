@@ -1,5 +1,5 @@
 1) Just download latest MinGW-w64 from: http://sourceforge.net/projects/mingw-w64/
-	- Click Files->Toolchains targetting Win64->PersonalBuilds->mingw-builds->5.1.0 (or latest)->threads-posix->seh
+	- Click Files->Toolchains targetting Win64->PersonalBuilds->mingw-builds->6.1.0 (or latest)->threads-posix->seh
 	- Download the 7z file and extract contents to "C:\MinGW64"
 
 2) When creating new project, make sure to uncheck "Display compatible toolchains only"

@@ -32,6 +32,7 @@
 #include "../Resources/enums.h"
 #include "../Testing/claim.h"
 #include "dag.h"
+#include "entity.h"
 
 class DAG;
 class AssayNode;
@@ -41,7 +42,7 @@ class AssayNode;
 // operand, as well as the operation type and children.  Together,
 // forms a tree which represents an entire boolean expression
 /////////////////////////////////////////////////////////////////
-class Expression
+class Expression : public Entity
 {
     protected:
         // Variables
@@ -52,6 +53,7 @@ class Expression
 		AssayNode *sensor1;
 		AssayNode *sensor2;
 		DAG *unconditionalParent;
+		static int next_id;
 
 		// Methods
 		static bool recursiveValidate(Expression *e);
@@ -79,6 +81,9 @@ class Expression
         string printExpression();
         bool evaluateExpression();
         void getParentDags(list<DAG *> *parents);
+
+        // Friend classes
+        friend class FileOut;
 
  };
 #endif

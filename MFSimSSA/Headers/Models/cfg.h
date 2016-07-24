@@ -45,11 +45,16 @@ class CFG
 		vector<DAG*> allDags;
 		list<DAG*> heads;
 		vector<ConditionalGroup *> conditionalGroups;
+		string name;
 
 	public:
 		// Constructors
 		CFG();
 		virtual ~CFG();
+
+		// Getters/Setters
+		void setName(string n) { name = n; }
+		string getName() { return name; }
 
 		// Methods
 		DAG * AddNewDAG(string name);
@@ -67,6 +72,7 @@ class CFG
 		void recursiveSeparate(DAG *cd, DAG *pd, AssayNode *n);
 
 		friend class CompiledCFG;
+		friend class FileOut;
 
 };
 #endif
