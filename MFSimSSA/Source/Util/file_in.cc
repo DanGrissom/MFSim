@@ -43,6 +43,7 @@ FileIn::~FileIn(){}
 ////////////////////////////////////////////////////////////////////////////
 CFG *FileIn::ReadCfgFromFile(string fileName)
 {
+	// Init data structures/variables
 	CFG *cfg = new CFG();
 	map<string, DAG *> dags;
 	map<int, Expression *> *exps = new map<int, Expression *>();
@@ -50,13 +51,11 @@ CFG *FileIn::ReadCfgFromFile(string fileName)
 	vector<ConditionalGroup *> cgs;
 	ConditionalGroup *currentCg = NULL;
 	Condition *currentCondition = NULL;
-	//Expression *expressionJustParsed = NULL;
-	//DAG *branchIfTrueJustParsed = NULL;
-	//vector<TransferEdge *> transferEdges;
+	int highestDagId = 0;
 
+	// Open file and read
 	ifstream is;
 	is.open(fileName.c_str());
-
 	{
 		stringstream str;
 		str << "Failed to properly read CFG file: " << fileName << endl;
@@ -67,9 +66,8 @@ CFG *FileIn::ReadCfgFromFile(string fileName)
 	string dagFileNamePrefix = fileName.substr(0, fileName.length() - 4); // Remove ".cfg"
 	string dagFileExt = ".dag";
 
+	// Parse each line
 	string line;
-	int highestDagId = 0;
-
 	while (!is.eof())
 	{
 		line = GetLine(&is);
@@ -103,6 +101,7 @@ CFG *FileIn::ReadCfgFromFile(string fileName)
 				d->id = atoi(dagId.c_str());
 				dags[dagName] = d;
 
+				// Update highestDagId for internal maintenance
 				if (d->id > highestDagId)
 					highestDagId = d->id;
 			}
@@ -121,27 +120,17 @@ CFG *FileIn::ReadCfgFromFile(string fileName)
 			}
 			else if (tag == "COND")
 			{
-
-
 				///////////////////////////////////////////////////////////////////////
 				// Every time we hit a condition tag, it means it's time to parse a new
 				// condition. The COND() tag will be followed by optional EXP() and TD()
 				// tags before the next COND() tag. First, add the last condition if
-				// one exists....
+				// one exists before creating a new condition.
 				if (currentCondition)
 					currentCg->addExistingCondition(currentCondition);
-					//cg->addNewCondition(expressionJustParsed, branchIfTrueJustParsed, transferEdges);
-
-				// ....then clear out all of the current condition variables so the new
-				// condition can begin setting this info.
 				currentCondition = new Condition();
-				//expressionJustParsed = NULL;
-				//branchIfTrueJustParsed = NULL;
-				//transferEdges.clear();
 
 				// Get conditional group
-				int cgId = atoi(p.at(0).c_str());
-				currentCg = cgs.at(cgId);
+				currentCg = cgs.at(atoi(p.at(0).c_str()));
 
 				// Read in Dependent DAG names and fetch DAG;
 				// add to condition
@@ -175,10 +164,7 @@ CFG *FileIn::ReadCfgFromFile(string fileName)
 				int expId = atoi(p.at(0).c_str());
 				string operandType = p.at(1);
 
-				ExOperandType opndType;
-				//ExOperationType optnType;
-
-				// Either get an already existent (pre-creation) expression,
+				// Either get an already existent (pre-created) expression,
 				// or create it now
 				Expression *e = AddOrGetUniqueExpressionFromMap(exps, expId);
 
@@ -186,27 +172,22 @@ CFG *FileIn::ReadCfgFromFile(string fileName)
 				{
 
 					e->operandType = OP_SUB_EXP;
-					string operationType = p.at(2);
-					e->operationType = GetExOperationTypeFromString(operationType);
+					e->operationType = GetExOperationTypeFromString(p.at(2));
 					e->operands = new vector<Expression *>();
-					int subExp1Id = atoi(p.at(3).c_str());
 
-					// Either get an already existent (pre-creation) expression,
-					// or create it now
+					// Either get an already existent (pre-creation) expression, or create it now
+					int subExp1Id = atoi(p.at(3).c_str());
 					Expression *se1 = AddOrGetUniqueExpressionFromMap(exps, subExp1Id);
 					e->operands->push_back(se1);
 
 					if (e->operationType == OP_NOT)
-					{
 						claim(p.size() == 4, "Invalid number of parameters for EXP w/ SUB_EXP/OP_NOT.");
-					}
 					else
 					{
 						claim(p.size() >= 5, "Invalid number of parameters for EXP w/ SUB_EXP/OP_AND/OP_OR.");
-						int subExp2Id = atoi(p.at(4).c_str());
 
-						// Either get an already existent (pre-creation) expression,
-						// or create it now
+						// Either get an already existent (pre-creation) expression, or create it now
+						int subExp2Id = atoi(p.at(4).c_str());
 						Expression *se2 = AddOrGetUniqueExpressionFromMap(exps, subExp2Id);
 						e->operands->push_back(se2);
 					}
@@ -215,84 +196,58 @@ CFG *FileIn::ReadCfgFromFile(string fileName)
 				{
 					claim(p.size() == 4, "Invalid number of parameters for EXP w/ RUN_COUNT.");
 					e->operandType = OP_SUB_EXP;
-					string operationType = p.at(2);
-					e->operationType = GetExOperationTypeFromString(operationType);
-					int runCount = strtod(p.at(3).c_str(), NULL);
-					e->constant = runCount;
+					e->operationType = GetExOperationTypeFromString(p.at(2));
+					e->constant = strtod(p.at(3).c_str(), NULL); // run count
 				}
 				else if (operandType == "ONE_SENSOR")
 				{
 					claim(p.size() == 6, "Invalid number of parameters for EXP w/ ONE_SENSOR.");
 					e->operandType = OP_ONE_SENSOR;
-					string operationType = p.at(2);
-					e->operationType = GetExOperationTypeFromString(operationType);
-					string op1SensorDagName = p.at(3);
-					int op1SensorNodeId = atoi(p.at(4).c_str());
-					DAG *dag1 = dags[op1SensorDagName];
-					e->sensor1 = dag1->getNode(op1SensorNodeId);
-					double op2StaticVal = strtod(p.at(5).c_str(), NULL);
-					e->constant = op2StaticVal;
-
+					e->operationType = GetExOperationTypeFromString(p.at(2));
+					DAG *dag1 = dags[p.at(3)];
+					e->sensor1 = dag1->getNode(atoi(p.at(4).c_str())); // op1SensorNodeId
+					e->constant = strtod(p.at(5).c_str(), NULL); // op2StaticVal
 				}
 				else if (operandType == "TWO_SENSORS")
 				{
 					claim(p.size() == 7, "Invalid number of parameters for EXP w/ TWO_SENSORS.");
 					e->operandType = OP_TWO_SENSORS;
-					string operationType = p.at(2);
-					e->operationType = GetExOperationTypeFromString(operationType);
-
-					string op1SensorDagName = p.at(3);
-					int op1SensorNodeId = atoi(p.at(4).c_str());
-					DAG *dag1 = dags[op1SensorDagName];
-					e->sensor1 = dag1->getNode(op1SensorNodeId);
-
-					string op2SensorDagName = p.at(5);
-					int op2SensorNodeId = atoi(p.at(6).c_str());
-					DAG *dag2 = dags[op2SensorDagName];
-					e->sensor2 = dag2->getNode(op2SensorNodeId);
+					e->operationType = GetExOperationTypeFromString(p.at(2));
+					DAG *dag1 = dags[p.at(3)];
+					e->sensor1 = dag1->getNode(atoi(p.at(4).c_str())); // op1SensorNodeId
+					DAG *dag2 = dags[p.at(5)];
+					e->sensor2 = dag2->getNode(atoi(p.at(6).c_str())); // op2SensorNodeId
 				}
 				else if (operandType == "TRUE")
 				{
 					claim(p.size() == 4, "Invalid number of parameters for EXP w/ TRUE.");
 					e->operandType = OP_TRUE;
-					string operationType = p.at(2);
-					e->operationType = GetExOperationTypeFromString(operationType);
-					string op1UncondDagName = p.at(3);
-					e->unconditionalParent = dags[op1UncondDagName];
+					e->operationType = GetExOperationTypeFromString(p.at(2));
+					e->unconditionalParent = dags[p.at(3)]; // op1UncondDagName
 				}
 				else if (operandType == "FALSE")
 				{
 					claim(p.size() == 4, "Invalid number of parameters for EXP w/ FALSE.");
 					e->operandType = OP_FALSE;
-					string operationType = p.at(2);
-					e->operationType = GetExOperationTypeFromString(operationType);
-					string op1UncondDagName = p.at(3);
-					e->unconditionalParent = dags[op1UncondDagName];
+					e->operationType = GetExOperationTypeFromString(p.at(2));
+					e->unconditionalParent = dags[p.at(3)]; // op1UncondDagName
 				}
 				else
 					claim(false, operandType + " is an unsupported operand type.");
 			}
 			else if (tag == "TD")
 			{
+				// Create droplet transfer edge and add to condition
+				TransferEdge * te = new TransferEdge();
+				currentCondition->transfers.push_back(te);
+
 				// Get transfer out node
-				string toDagName = p.at(0);
-				int toNodeId = atoi(p.at(1).c_str());
-				DAG *toDag = dags[toDagName];
-				AssayNode *to = toDag->getNode(toNodeId);
+				DAG *toDag = dags[p.at(0)];
+				te->transOut = toDag->getNode(atoi(p.at(1).c_str())); // toNodeId
 
 				// Get transfer in node
-				string tiDagName = p.at(2);
-				int tiNodeId = atoi(p.at(3).c_str());
-				DAG *tiDag = dags[tiDagName];
-				AssayNode *ti = tiDag->getNode(tiNodeId);
-
-				// Create droplet transfer edge
-				TransferEdge * te = new TransferEdge();
-				te->transIn = ti;
-				te->transOut = to;
-
-				// Add transfer edge to condition
-				currentCondition->transfers.push_back(te);
+				DAG *tiDag = dags[p.at(2)];
+				te->transIn = tiDag->getNode(atoi(p.at(3).c_str())); // tiNodeId
 			}
 			else
 			{
@@ -321,17 +276,11 @@ CFG *FileIn::ReadCfgFromFile(string fileName)
 	if (highestDagId + 1 > DAG::next_id)
 		DAG::next_id = highestDagId+1;
 
-	// Recreate Edges
-//	while (!edges.empty())
-//	{
-//		cfg->ParentChild(nodes[edges[0]], nodes[edges[1]]);
-//		edges.erase(edges.begin());
-//		edges.erase(edges.begin());
-//	}
-
+	// Cleanup
 	is.close();
 	delete exps;
 
+	// Construct the CFG (internal maintenance) and return
 	cfg->ConstructAndValidateCFG();
 	return cfg;
 }
@@ -344,11 +293,13 @@ CFG *FileIn::ReadCfgFromFile(string fileName)
 Expression * FileIn::AddOrGetUniqueExpressionFromMap(map<int, Expression *> *exps, int expId)
 {
 	Expression *e = NULL;
+
+	// Get the expression if found...
 	if (exps->find(expId) != exps->end())
 		e = (*exps)[expId];
 	else
 	{
-		e = new Expression(expId);
+		e = new Expression(expId); //...otherwise create a new one
 		(*exps)[expId] = e;
 	}
 
