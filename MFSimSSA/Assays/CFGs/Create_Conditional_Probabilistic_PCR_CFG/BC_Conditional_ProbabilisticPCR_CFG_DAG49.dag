@@ -1,0 +1,9 @@
+// DAG Specification for Begin Dispense
+DAGNAME (Begin Dispense)
+NODE (214, DISPENSE, PCR, 10, DIS1_Begin Dispense)
+EDGE (214, 215)
+NODE (215, HEAT, 45, HT_1_Begin Dispense)
+EDGE (215, 216)
+NODE (216, COOL, 45, HT_2_Begin Dispense)
+EDGE (216, 217)
+NODE (217, TRANSFER_OUT, TOT1_Begin Dispense)

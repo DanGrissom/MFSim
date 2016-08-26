@@ -1,0 +1,11 @@
+// DAG Specification for ReactantReplenishStep7
+DAGNAME (ReactantReplenishStep7)
+NODE (99, DISPENSE, ReplacementMix, 10, DIS1_ReactantReplenishStep7)
+EDGE (99, 100)
+NODE (100, HEAT, 45, HT_1_ReactantReplenishStep7)
+EDGE (100, 102)
+NODE (101, TRANSFER_IN, TIN1_ReactantReplenishStep7)
+EDGE (101, 102)
+NODE (102, MIX, 2, 1, MIX1_ReactantReplenishStep7)
+EDGE (102, 103)
+NODE (103, TRANSFER_OUT, TOT1_ReactantReplenishStep7)

@@ -1,0 +1,11 @@
+// DAG Specification for Dispense
+DAGNAME (Dispense)
+NODE (59, DISPENSE, ReplacementMix, 10, DIS1_Dispense)
+EDGE (59, 61)
+NODE (60, DISPENSE, template, 10, DIS2_Dispense)
+EDGE (60, 61)
+NODE (61, MIX, 2, 1, MIX1_Dispense)
+EDGE (61, 62)
+NODE (62, HEAT, 45, HT_1_Dispense)
+EDGE (62, 63)
+NODE (63, TRANSFER_OUT, TOT1_Dispense)

@@ -1,0 +1,9 @@
+// DAG Specification for FinishThermocyclingStep17
+DAGNAME (FinishThermocyclingStep17)
+NODE (251, TRANSFER_IN, TIN1_FinishThermocyclingStep17)
+EDGE (251, 252)
+NODE (252, HEAT, 45, HT_1_FinishThermocyclingStep17)
+EDGE (252, 253)
+NODE (253, COOL, 45, HT_2_FinishThermocyclingStep17)
+EDGE (253, 254)
+NODE (254, TRANSFER_OUT, TOT1_FinishThermocyclingStep17)

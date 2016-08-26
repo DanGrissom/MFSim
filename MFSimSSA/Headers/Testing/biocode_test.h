@@ -55,6 +55,7 @@ class BiocodeTest
         // Biocode Conditional benchmarks
         static CFG *Create_Conditional_Demo_CFG(bool outputBiocoderGraphs);
         static CFG *Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(bool outputBiocoderGraphs);
+        static CFG *Create_Compound_Conditional_With_Transfer_Droplets_Demo_CFG(bool outputBiocoderGraphs);
         static CFG *Create_Conditional_With_Transfer_Droplets_Demo_CFG(bool outputBiocoderGraphs);
         static CFG *Create_Conditional_B2_InVitroDiag_CFG(int numSamples, int numReagents, string inputArchFile, double mult, double secPerTS, int repeat, bool outputBiocoderGraphs);
         static CFG *Create_Conditional_B3_Protein_FaultTolerant_CFG(double mult, double secPerTS, int repeat, bool outputBiocoderGraphs);

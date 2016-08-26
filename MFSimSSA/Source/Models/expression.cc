@@ -33,6 +33,26 @@ int Expression::next_id = 1;
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
+// Creating an expression that will be manually created externally.
+// This method should only be called by the FileIn class when reading
+// in a CFG from a file.
+/////////////////////////////////////////////////////////////////////
+Expression::Expression(int expId)
+{
+	// Set ID and increase next_id if necessary
+	id = expId;
+	if (id >= next_id)
+		next_id = id + 1;
+
+	//operationType = ot;
+	operands = NULL;
+	//operandType = OP_TWO_SENSORS;
+	constant = 0;
+	sensor1 = NULL;
+	sensor2 = NULL;
+	unconditionalParent = NULL;
+}
+/////////////////////////////////////////////////////////////////////
 // Creating an expression that compares the readings from two sensors.
 /////////////////////////////////////////////////////////////////////
 Expression::Expression(AssayNode *s1, ExOperationType ot, AssayNode *s2)
@@ -193,7 +213,7 @@ bool Expression::recursiveValidate(Expression *e)
 	else if (e->operationType == OP_AND && e->operationType == OP_OR && e->operands->size() <= 1)
 		return false;
 	else if (e->operands->size() == 0) // e->operationType == OP_NOT
-			return false;
+		return false;
 
 	bool isValid = true;
 	for (int i = 0; i < e->operands->size(); i++)

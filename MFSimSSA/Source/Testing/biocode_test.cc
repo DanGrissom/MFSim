@@ -928,6 +928,90 @@ CFG * BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(boo
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// Creates a DAG that transfers a droplet to one of two simple child DAGs
+// based on multiple sensor readings (to test AND/OR/NOT expression types).
+///////////////////////////////////////////////////////////////////////////
+CFG * BiocodeTest::Create_Compound_Conditional_With_Transfer_Droplets_Demo_CFG(bool outputBiocoderGraphs)
+{
+	double mult = 1; // TimeStep multiplier
+	double secPerTS = .5; //seconds per timestep
+
+	string d1;
+	string d2;
+	string to;
+	string ti_save;
+	string ti_waste;
+
+	// Creation of BioSystem
+	BioSystem * BioSys= new BioSystem();
+	BioSys->setOutputGraphs(outputBiocoderGraphs);
+
+	// BioCoder Mix/Detect Protocol
+	BioCoder * bio = BioSys->addBioCoder();
+	Container tube = bio->new_container(STERILE_MICROFUGE_TUBE2ML);
+	Fluid reagent = bio->new_fluid("reagent",bio->vol(100,ML));
+	Fluid sample = bio->new_fluid("sample",bio->vol(100,ML));
+	Volume dropVol = bio->vol(10, UL);
+	Time time = bio->time(1, SECS);
+	bio->first_step("Dispense sample/reagent");
+	bio->measure_fluid(sample, dropVol, tube);
+	bio->measure_fluid(reagent, dropVol, tube);
+	bio->next_step("Mix");
+	bio->vortex(tube, time);
+	bio->next_step("Detect 1");
+	d1 = bio->measure_fluorescence(tube, time);
+	bio->next_step("Detect 2");
+	d2 = bio->measure_fluorescence(tube, time);
+	bio->next_step("Transfer Out");
+	to = bio->save_fluid(tube);
+	bio->end_protocol();
+
+	// BioCoder Save Protocol
+	BioCoder * bioSave = BioSys->addBioCoder();
+	tube = bioSave->new_container(STERILE_MICROFUGE_TUBE2ML);
+	dropVol = bioSave->vol(10, UL);
+	bioSave->first_step("Transfer In");
+	ti_save = bioSave->reuse_fluid(tube);
+	bioSave->next_step("Save this fluid");
+	bioSave->drain(tube, "save");
+	bioSave->end_protocol();
+
+	// BioCoder Waste Protocol
+	BioCoder * bioWaste = BioSys->addBioCoder();
+	tube = bioWaste->new_container(STERILE_MICROFUGE_TUBE2ML);
+	dropVol = bioWaste->vol(10, UL);
+	bioWaste->first_step("Transfer In");
+	ti_waste = bioWaste->reuse_fluid(tube);
+	bioWaste->next_step("Discard this fluid");
+	bioWaste->drain(tube, "waste");
+	bioWaste->end_protocol();
+
+	// Conditional Groups
+	BioConditionalGroup *bcg = BioSys->addBioCondGroup();
+
+	// Form: compoundExp(subExp1 && NOT(subExp2)) // "NOT(subExp2)" == notExp
+	BioExpression *subExp1 = new BioExpression(d1, OP_LT, 0.5);
+	BioExpression *subExp2 = new BioExpression(d2, OP_GoE, 0.5);
+	BioExpression *notExp = new BioExpression(subExp2);
+	BioExpression * compoundExp = new BioExpression(OP_OR);
+	compoundExp->addOperand(subExp1);
+	compoundExp->addOperand(notExp);
+
+
+	BioCondition *bc = bcg->addNewCondition(compoundExp, bioSave);
+	bc->addTransferDroplet(to, ti_save);
+	bc = bcg->addNewCondition(NULL, bioWaste);
+	bc->addTransferDroplet(to, ti_waste);
+
+	// Generate CFG from Biocoder and output CFG and all DAGs
+	CFG *cfg = BioSys->GetDmfbExecutableCFG();
+	cfg->setName("BC_Compound_Conditional_TransferDrops_CFG");
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
+    cout << "BioCoder Simple Conditional w/ Transfer Droplets CFG Generated" << endl;
+    return cfg;
+}
+
+///////////////////////////////////////////////////////////////////////////
 // This benchmark details the DAG for the multiplexed in-vitro diagnostics
 // assay detailed in Chakrabarty's benchmarks.  Plasma/Serum are assayed
 // for glucose/lactate measurements. DAG created using BIOCODER. This
@@ -1501,7 +1585,7 @@ BioCoder * BiocodeTest::B3_GenerateFtLevelCase_Det(BioSystem *bs, string bcBaseN
 ///////////////////////////////////////////////////////////////////////////
 // Biocoder protocol containing conditional flow for Probabilistic PCR
 ///////////////////////////////////////////////////////////////////////////
-static CFG *Create_Conditional_Probabilistic_PCR_CFG(double dnaThreshold, bool outputBiocoderGraphs)
+CFG *BiocodeTest::Create_Conditional_Probabilistic_PCR_CFG(double dnaThreshold, bool outputBiocoderGraphs)
 {
 	double mult = 1; // TimeStep multiplier
 	double secPerTS = .5; //seconds per timestep
@@ -1775,7 +1859,8 @@ static CFG *Create_Conditional_Probabilistic_PCR_CFG(double dnaThreshold, bool o
 	//			Generate CFG from Biocoder and output CFG and all DAGs
 	///////////////////////////////////////////////////////////////////////////////
 	CFG *cfg = BioSys->GetDmfbExecutableCFG();
-	cfg->OutputGraphFile("BC_Conditional_ProbabilisticPCR_CFG", true, true, true);
+	cfg->setName("BC_Conditional_ProbabilisticPCR_CFG");
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
 	cout << "BioCoder Conditional Probabilistic PCR CFG Generated" << endl;
 	return cfg;
 }

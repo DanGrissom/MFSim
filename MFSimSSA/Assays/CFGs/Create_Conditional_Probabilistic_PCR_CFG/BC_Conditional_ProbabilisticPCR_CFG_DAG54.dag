@@ -1,0 +1,9 @@
+// DAG Specification for FinishThermocyclingStep13
+DAGNAME (FinishThermocyclingStep13)
+NODE (235, TRANSFER_IN, TIN1_FinishThermocyclingStep13)
+EDGE (235, 236)
+NODE (236, HEAT, 45, HT_1_FinishThermocyclingStep13)
+EDGE (236, 237)
+NODE (237, COOL, 45, HT_2_FinishThermocyclingStep13)
+EDGE (237, 238)
+NODE (238, TRANSFER_OUT, TOT1_FinishThermocyclingStep13)

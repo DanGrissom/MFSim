@@ -111,6 +111,7 @@ class DAG : public Entity
 		void setFreq(unsigned long long freqHz);
 		void setName(string n) { name = n; }
 		string getName() { return name; }
+		AssayNode * getNode(int id);
 		vector<AssayNode *> getAllNodes() { return allNodes; }
 		vector<AssayNode *> getAllInputNodes() { return heads; }
 		vector<AssayNode *> getAllOutputNodes() { return tails; }
@@ -126,6 +127,7 @@ class DAG : public Entity
 		void PrintParChildRelationships();
 		void OutputGraphFile(string filename, bool color, bool fullStats);
 		string GetPrintableName();
+		string GetIdName();
 
 		// Transformation Functions - Used only once to convert assays in various ways
 		void ConvertMixSplitsToDilutes();
@@ -149,6 +151,7 @@ class DAG : public Entity
 		friend class Priority;
 		friend class SAPlacer;
 		friend class Analyze;
+		friend class FileIn;
 		friend class Test;
 		friend class CFG;
 

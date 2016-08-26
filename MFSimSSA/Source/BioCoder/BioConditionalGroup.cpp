@@ -275,9 +275,15 @@ Expression *BioConditionalGroup::recursiveConvert(BioExpression *be, vector<DAG*
 	}
 	else if(be->operandType==OP_SUB_EXP)
 	{
-		Expression *newExp = new Expression(be->operationType);
-		for (int i = 0; i < be->operands->size(); i++)
-			newExp->addOperand(recursiveConvert(be->operands->at(i), dags));
+		Expression *newExp = NULL;
+		if (be->operationType == OP_NOT)
+			newExp = new Expression(recursiveConvert(be->operands->front(), dags));
+		else
+		{
+			newExp = new Expression(be->operationType);
+			for (int i = 0; i < be->operands->size(); i++)
+				newExp->addOperand(recursiveConvert(be->operands->at(i), dags));
+		}
 		return newExp;
 	}
 

@@ -33,6 +33,7 @@ using namespace std;
 #include <string>
 #include "sort.h"
 #include "../Models/dag.h"
+#include "../Models/cfg.h"
 
 class Scheduler;
 class Placer;
@@ -54,6 +55,7 @@ class FileIn
 
 
 		// File Input Methods
+		static CFG *ReadCfgFromFile(string fileName);
 		static DAG *ReadDagFromFile(string fileName);
 		static DmfbArch *ReadDmfbArchFromFile(string fileName);
 		static void ReadScheduledDagAndArchFromFile(DAG *dag, DmfbArch *arch, Placer *placer, string fileName);
@@ -71,5 +73,10 @@ class FileIn
 		static CompactionType GetTypeFromCompKey(string cKey);
 		static ProcessEngineType GetTypeFromPeKey(string peKey);
 		static ExecutionType GetTypeFromEtKey(string etKey);
+
+	private:
+		// Helper methods
+		 static ExOperationType GetExOperationTypeFromString(string str);
+		 static Expression * AddOrGetUniqueExpressionFromMap(map<int, Expression *> *exps, int expId);
 };
 #endif

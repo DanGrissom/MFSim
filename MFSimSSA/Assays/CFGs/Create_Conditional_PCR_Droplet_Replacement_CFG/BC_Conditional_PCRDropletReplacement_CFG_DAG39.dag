@@ -1,0 +1,9 @@
+// DAG Specification for TailStep7
+DAGNAME (TailStep7)
+NODE (173, TRANSFER_IN, TIN1_TailStep7)
+EDGE (173, 174)
+NODE (174, HEAT, 30, HT_1_TailStep7)
+EDGE (174, 175)
+NODE (175, HEAT, 45, HT_2_TailStep7)
+EDGE (175, 176)
+NODE (176, TRANSFER_OUT, TOT1_TailStep7)

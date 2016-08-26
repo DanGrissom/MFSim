@@ -38,6 +38,351 @@ FileIn::FileIn() {}
 FileIn::~FileIn(){}
 
 ////////////////////////////////////////////////////////////////////////////
+// Reads and re-creates the CFG structure saved in the specified file so it
+// can be processed by the system (scheduling, placement, routing, etc.)
+////////////////////////////////////////////////////////////////////////////
+CFG *FileIn::ReadCfgFromFile(string fileName)
+{
+	CFG *cfg = new CFG();
+	map<string, DAG *> dags;
+	map<int, Expression *> *exps = new map<int, Expression *>();
+	map<Condition *, int> condToExpId;
+	vector<ConditionalGroup *> cgs;
+	ConditionalGroup *currentCg = NULL;
+	Condition *currentCondition = NULL;
+	//Expression *expressionJustParsed = NULL;
+	//DAG *branchIfTrueJustParsed = NULL;
+	//vector<TransferEdge *> transferEdges;
+
+	ifstream is;
+	is.open(fileName.c_str());
+
+	{
+		stringstream str;
+		str << "Failed to properly read CFG file: " << fileName << endl;
+		claim (is.good(), &str);
+	}
+
+	// Get prefix file name for DAG files
+	string dagFileNamePrefix = fileName.substr(0, fileName.length() - 4); // Remove ".cfg"
+	string dagFileExt = ".dag";
+
+	string line;
+	int highestDagId = 0;
+
+	while (!is.eof())
+	{
+		line = GetLine(&is);
+		string tag;
+		vector<string> p;
+		if (!(line.empty() || line.substr(0,2) == "//" ))
+		{
+			ParseLine(line, &tag, &p);
+
+			tag = Util::StringToUpper(tag);
+
+			// Recreate CFG Structure
+			if (tag == "NAME")
+			{
+				claim(p.size() == 1, "Invalid number of parameters for NAME.");
+				std::replace(p.at(0).begin(), p.at(0).end(), ' ', '_');
+				cfg->setName(p.at(0));
+			}
+			else if (tag == "DAG")
+			{
+				claim(p.size() == 1, "Invalid number of parameters for DAG.");
+				string dagName = p.at(0);
+				string dagFileName = dagFileNamePrefix + "_" + dagName + dagFileExt;
+
+				// Read DAG from file and add to CFG....
+				DAG *d = FileIn::ReadDagFromFile(dagFileName);
+				string dagId = dagName.substr(3, string::npos);
+				cfg->AddExistingDAG(d);
+
+				// ...and place into map
+				d->id = atoi(dagId.c_str());
+				dags[dagName] = d;
+
+				if (d->id > highestDagId)
+					highestDagId = d->id;
+			}
+			else if (tag == "NUMCGS")
+			{
+				claim(p.size() == 1, "Invalid number of parameters for NUMCGS.");
+
+				// Get number of conditional groups and add that number of CGs
+				// to the CFG; keep CGs in vector for easy reference
+				int numCgs = (atoi(p.at(0).c_str()));
+				for (int i = 0; i < numCgs; i++)
+				{
+					ConditionalGroup *cg = cfg->AddNewCG();
+					cgs.push_back(cg);
+				}
+			}
+			else if (tag == "COND")
+			{
+
+
+				///////////////////////////////////////////////////////////////////////
+				// Every time we hit a condition tag, it means it's time to parse a new
+				// condition. The COND() tag will be followed by optional EXP() and TD()
+				// tags before the next COND() tag. First, add the last condition if
+				// one exists....
+				if (currentCondition)
+					currentCg->addExistingCondition(currentCondition);
+					//cg->addNewCondition(expressionJustParsed, branchIfTrueJustParsed, transferEdges);
+
+				// ....then clear out all of the current condition variables so the new
+				// condition can begin setting this info.
+				currentCondition = new Condition();
+				//expressionJustParsed = NULL;
+				//branchIfTrueJustParsed = NULL;
+				//transferEdges.clear();
+
+				// Get conditional group
+				int cgId = atoi(p.at(0).c_str());
+				currentCg = cgs.at(cgId);
+
+				// Read in Dependent DAG names and fetch DAG;
+				// add to condition
+				int numDepDags = atoi(p.at(1).c_str());
+				for (int i = 0; i < numDepDags; i++)
+				{
+					string depDagName = p.at(2 + i);
+					DAG *d = dags[depDagName];
+					currentCondition->dependents.push_back(d);
+				}
+
+				// Read in branchIfTrue DAG names and fetch DAGs;
+				// add to condition
+				int numBranchDags = atoi(p.at(2 + numDepDags).c_str());
+				claim(numBranchDags == 1, "Simulator currently only supports 1 brahchIfTrue DAG.");
+				for (int i = 0; i < numBranchDags; i++)
+				{
+					string branchDagName = p.at(3 + numDepDags + i);
+					DAG *d = dags[branchDagName];
+					currentCondition->branchIfTrue = d;
+				}
+
+				// Get expression id and map condition to id (for later association)
+				int expId = atoi(p.at(3 + numDepDags + numBranchDags).c_str());
+				if (expId != -1)
+					condToExpId[currentCondition] = expId;
+
+			}
+			else if (tag == "EXP")
+			{
+				int expId = atoi(p.at(0).c_str());
+				string operandType = p.at(1);
+
+				ExOperandType opndType;
+				//ExOperationType optnType;
+
+				// Either get an already existent (pre-creation) expression,
+				// or create it now
+				Expression *e = AddOrGetUniqueExpressionFromMap(exps, expId);
+
+				if (operandType == "SUB_EXP")
+				{
+
+					e->operandType = OP_SUB_EXP;
+					string operationType = p.at(2);
+					e->operationType = GetExOperationTypeFromString(operationType);
+					e->operands = new vector<Expression *>();
+					int subExp1Id = atoi(p.at(3).c_str());
+
+					// Either get an already existent (pre-creation) expression,
+					// or create it now
+					Expression *se1 = AddOrGetUniqueExpressionFromMap(exps, subExp1Id);
+					e->operands->push_back(se1);
+
+					if (e->operationType == OP_NOT)
+					{
+						claim(p.size() == 4, "Invalid number of parameters for EXP w/ SUB_EXP/OP_NOT.");
+					}
+					else
+					{
+						claim(p.size() >= 5, "Invalid number of parameters for EXP w/ SUB_EXP/OP_AND/OP_OR.");
+						int subExp2Id = atoi(p.at(4).c_str());
+
+						// Either get an already existent (pre-creation) expression,
+						// or create it now
+						Expression *se2 = AddOrGetUniqueExpressionFromMap(exps, subExp2Id);
+						e->operands->push_back(se2);
+					}
+				}
+				else if (operandType == "RUN_COUNT")
+				{
+					claim(p.size() == 4, "Invalid number of parameters for EXP w/ RUN_COUNT.");
+					e->operandType = OP_SUB_EXP;
+					string operationType = p.at(2);
+					e->operationType = GetExOperationTypeFromString(operationType);
+					int runCount = strtod(p.at(3).c_str(), NULL);
+					e->constant = runCount;
+				}
+				else if (operandType == "ONE_SENSOR")
+				{
+					claim(p.size() == 6, "Invalid number of parameters for EXP w/ ONE_SENSOR.");
+					e->operandType = OP_ONE_SENSOR;
+					string operationType = p.at(2);
+					e->operationType = GetExOperationTypeFromString(operationType);
+					string op1SensorDagName = p.at(3);
+					int op1SensorNodeId = atoi(p.at(4).c_str());
+					DAG *dag1 = dags[op1SensorDagName];
+					e->sensor1 = dag1->getNode(op1SensorNodeId);
+					double op2StaticVal = strtod(p.at(5).c_str(), NULL);
+					e->constant = op2StaticVal;
+
+				}
+				else if (operandType == "TWO_SENSORS")
+				{
+					claim(p.size() == 7, "Invalid number of parameters for EXP w/ TWO_SENSORS.");
+					e->operandType = OP_TWO_SENSORS;
+					string operationType = p.at(2);
+					e->operationType = GetExOperationTypeFromString(operationType);
+
+					string op1SensorDagName = p.at(3);
+					int op1SensorNodeId = atoi(p.at(4).c_str());
+					DAG *dag1 = dags[op1SensorDagName];
+					e->sensor1 = dag1->getNode(op1SensorNodeId);
+
+					string op2SensorDagName = p.at(5);
+					int op2SensorNodeId = atoi(p.at(6).c_str());
+					DAG *dag2 = dags[op2SensorDagName];
+					e->sensor2 = dag2->getNode(op2SensorNodeId);
+				}
+				else if (operandType == "TRUE")
+				{
+					claim(p.size() == 4, "Invalid number of parameters for EXP w/ TRUE.");
+					e->operandType = OP_TRUE;
+					string operationType = p.at(2);
+					e->operationType = GetExOperationTypeFromString(operationType);
+					string op1UncondDagName = p.at(3);
+					e->unconditionalParent = dags[op1UncondDagName];
+				}
+				else if (operandType == "FALSE")
+				{
+					claim(p.size() == 4, "Invalid number of parameters for EXP w/ FALSE.");
+					e->operandType = OP_FALSE;
+					string operationType = p.at(2);
+					e->operationType = GetExOperationTypeFromString(operationType);
+					string op1UncondDagName = p.at(3);
+					e->unconditionalParent = dags[op1UncondDagName];
+				}
+				else
+					claim(false, operandType + " is an unsupported operand type.");
+			}
+			else if (tag == "TD")
+			{
+				// Get transfer out node
+				string toDagName = p.at(0);
+				int toNodeId = atoi(p.at(1).c_str());
+				DAG *toDag = dags[toDagName];
+				AssayNode *to = toDag->getNode(toNodeId);
+
+				// Get transfer in node
+				string tiDagName = p.at(2);
+				int tiNodeId = atoi(p.at(3).c_str());
+				DAG *tiDag = dags[tiDagName];
+				AssayNode *ti = tiDag->getNode(tiNodeId);
+
+				// Create droplet transfer edge
+				TransferEdge * te = new TransferEdge();
+				te->transIn = ti;
+				te->transOut = to;
+
+				// Add transfer edge to condition
+				currentCondition->transfers.push_back(te);
+			}
+			else
+			{
+				stringstream ss;
+				ss << "Invalid tag type: " << tag << endl;
+				claim(false, &ss);
+			}
+		}
+	}
+
+	// Add last condition to conditional group
+	if (currentCondition)
+		currentCg->addExistingCondition(currentCondition);
+	currentCg = NULL;
+	currentCondition = NULL;
+
+	// Finally, associate the conditions with the top-level expressions
+	map<Condition *, int>::iterator condIt = condToExpId.begin();
+	for (; condIt != condToExpId.end(); condIt++)
+	{
+		Condition *c = condIt->first;
+		c->statement = (*exps)[condIt->second];
+	}
+
+	// Make sure DAG id's created are higher than anything seen to guarantee uniqueness
+	if (highestDagId + 1 > DAG::next_id)
+		DAG::next_id = highestDagId+1;
+
+	// Recreate Edges
+//	while (!edges.empty())
+//	{
+//		cfg->ParentChild(nodes[edges[0]], nodes[edges[1]]);
+//		edges.erase(edges.begin());
+//		edges.erase(edges.begin());
+//	}
+
+	is.close();
+	delete exps;
+
+	cfg->ConstructAndValidateCFG();
+	return cfg;
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Takes in a map of expression ids (int) to expressions. The method returns
+// the expression with expId as its id, if it is found. If not, it creates
+// a new expression with expId as its id, adds it to the map, and returns it.
+////////////////////////////////////////////////////////////////////////////
+Expression * FileIn::AddOrGetUniqueExpressionFromMap(map<int, Expression *> *exps, int expId)
+{
+	Expression *e = NULL;
+	if (exps->find(expId) != exps->end())
+		e = (*exps)[expId];
+	else
+	{
+		e = new Expression(expId);
+		(*exps)[expId] = e;
+	}
+
+	return e;
+}
+////////////////////////////////////////////////////////////////////////////
+// Converts a string to ExOperationType enum type.
+////////////////////////////////////////////////////////////////////////////
+ExOperationType FileIn::GetExOperationTypeFromString(string str)
+{
+	if (str == "GT")
+		return OP_GT;
+	else if (str == "GoE")
+		return OP_GoE;
+	else if (str == "LT")
+		return OP_LT;
+	else if (str == "LoE")
+		return OP_LoE;
+	else if (str == "EQUAL")
+		return OP_EQUAL;
+	else if (str == "NOT")
+		return OP_NOT;
+	else if (str == "AND")
+		return OP_AND;
+	else if (str == "OR")
+		return OP_OR;
+	else if (str == "UNCOND")
+		return OP_UNCOND;
+	else
+		claim(false, str + " is an unknown expression operation type.");
+
+}
+
+////////////////////////////////////////////////////////////////////////////
 // Reads and re-creates the DAG structure saved in the specified file so it
 // can be processed by a scheduler.
 ////////////////////////////////////////////////////////////////////////////

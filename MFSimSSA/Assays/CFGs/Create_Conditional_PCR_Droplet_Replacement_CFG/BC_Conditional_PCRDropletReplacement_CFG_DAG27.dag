@@ -1,0 +1,9 @@
+// DAG Specification for ThermoHeadStep4
+DAGNAME (ThermoHeadStep4)
+NODE (125, TRANSFER_IN, TIN1_ThermoHeadStep4)
+EDGE (125, 126)
+NODE (126, HEAT, 20, HT_1_ThermoHeadStep4)
+EDGE (126, 127)
+NODE (127, DETECT, 1, 0.1, DCT1_ThermoHeadStep4)
+EDGE (127, 128)
+NODE (128, TRANSFER_OUT, TOT1_ThermoHeadStep4)

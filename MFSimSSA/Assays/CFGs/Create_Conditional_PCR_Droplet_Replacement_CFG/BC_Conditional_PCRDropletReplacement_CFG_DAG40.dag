@@ -1,0 +1,11 @@
+// DAG Specification for TailStep8
+DAGNAME (TailStep8)
+NODE (177, TRANSFER_IN, TIN1_TailStep8)
+EDGE (177, 178)
+NODE (178, HEAT, 30, HT_1_TailStep8)
+EDGE (178, 179)
+NODE (179, HEAT, 45, HT_2_TailStep8)
+EDGE (179, 180)
+NODE (180, HEAT, 300, HT_3_TailStep8)
+EDGE (180, 181)
+NODE (181, OUTPUT, AmplifiedPCR, WST1_TailStep8)

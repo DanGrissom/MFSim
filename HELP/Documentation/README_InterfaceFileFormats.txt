@@ -38,6 +38,25 @@ SpecialPins(pinCount, pin1, pin2,...)
 ResourceCount(c1, c2, c3,...)
 ResourceLocation(resType = {enum # for ResourceType}, leftX, topY, rightX, bottomY, tiledNum)
 
+/////////////////////////////////////////////////////////////////////////////
+// Control Flow Graph (.cfg) File (order is IMPORTANT)
+// NOTE: Can have multiple DAGs, should all be together.
+// NOTE: The general pattern is to have a COND(ition), followed by 0+ EXP(ressions),
+// followed by 0+ TDs(transfer droplets). This general COND-EXP-TD can repeate itself,
+// but the EXPs and TDs should be directly under the COND they belong to. 
+/////////////////////////////////////////////////////////////////////////////
+NAME (cfgName)
+DAG (dagName)	// Can be multiple
+NUMCGS (numConditionalGroups)
+COND (conditionalGroupId, numDependentDAGs, firstDependentDAG, .... , lastDependentDAG, numBranchIfTrueDAGs, firstBranchIfTrueDAG, .... , lastBranchIfTrueDAG, expressionId)
+EXP (expId, operandType [TRUE, FALSE], operationType [UNCOND], unconditionalParentDagName)
+EXP (expId, operandType [ONE_SENSOR], operationType [GT, GoE, LT, LoE, EQUAL], op1SensorDagName, op1SensorNodeId, op2StaticVal)
+EXP (expId, operandType [TWO_SENSORS], operationType [GT, GoE, LT, LoE, EQUAL], op1SensorDagName, op1SensorNodeId, op2SensorDagName, op2SensorNodeId,)
+EXP (expId, operandType [RUN_COUNT], operationType [GT, GoE, LT, LoE, EQUAL], op1StaticVal)
+EXP (expId, operandType [SUB_EXP], operationType [AND, OR], subExp1Id, subExp2Id)
+EXP (expId, operandType [EXP], operationType [NOT], subExpId)
+TD (transOutDag, transOutNodeId, transInDag, transInNodeId)
+
 
 /////////////////////////////////////////////////////////////////////////////
 // 0_DAG_to_SCHED File Format (order is unimportant)

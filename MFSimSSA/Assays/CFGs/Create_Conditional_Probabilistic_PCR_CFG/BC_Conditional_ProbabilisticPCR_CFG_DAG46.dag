@@ -1,0 +1,9 @@
+// DAG Specification for InitialThermocyclingStep6
+DAGNAME (InitialThermocyclingStep6)
+NODE (202, TRANSFER_IN, TIN1_InitialThermocyclingStep6)
+EDGE (202, 203)
+NODE (203, HEAT, 45, HT_1_InitialThermocyclingStep6)
+EDGE (203, 204)
+NODE (204, COOL, 45, HT_2_InitialThermocyclingStep6)
+EDGE (204, 205)
+NODE (205, TRANSFER_OUT, TOT1_InitialThermocyclingStep6)

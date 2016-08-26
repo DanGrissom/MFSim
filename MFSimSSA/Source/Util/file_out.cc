@@ -98,9 +98,10 @@ void FileOut::WriteDagToFile(DAG *dag, string fileName)
 // Writes the CFG and its included DAGs to a text file so it can be read
 // and processed later.
 ////////////////////////////////////////////////////////////////////////////
-void FileOut::WriteCfgToFile(CFG *cfg, string fileName)
+void FileOut::WriteCfgToFile(CFG *cfg, string directory, string fileName)
 {
 	ofstream os;
+	fileName = directory + fileName;
 	os.open(fileName.c_str());
 
 	{
@@ -110,6 +111,8 @@ void FileOut::WriteCfgToFile(CFG *cfg, string fileName)
 	}
 
 	os << "// CFG Specification for " << cfg->getName() << endl;
+	// NAME(cfgName)
+	os << "NAME(" << cfg->getName() << ")" << endl << endl;
 
 	// Write out all DAGs
 	for (int i = 0; i < cfg->allDags.size(); i++)
@@ -118,14 +121,14 @@ void FileOut::WriteCfgToFile(CFG *cfg, string fileName)
 
 		// Output DAG, if requested
 		stringstream dagFileName;
-		dagFileName << "Output/" << cfg->getName() << "_" + d->GetPrintableName() + ".txt";
+		dagFileName << directory << cfg->getName() << "_" + d->GetIdName() + ".dag";
 		FileOut::WriteDagToFile(d, dagFileName.str());
 		//d->OutputGraphFile(dagFileName.str(), color, fullStats);
 
 
 		// Output the DAG:
 		// DAG(dagName)
-		os << "DAG(" << d->GetPrintableName() + ")" << endl;
+		os << "DAG(" << d->GetIdName() + ")" << endl;
 	}
 	os << endl;
 
@@ -158,11 +161,11 @@ void FileOut::WriteCfgToFile(CFG *cfg, string fileName)
 			// Output dependentDAGs (first to last)
 			list<DAG *>::iterator it = c->dependents.begin();
 			for (; it != c->dependents.end(); it++)
-				os << ", " << (*it)->GetPrintableName();
+				os << ", " << (*it)->GetIdName();
 
 			// Output numBranchIfTrueDAGs and branchIfTrueDAG
 			if (c->branchIfTrue)
-				os << ", 1, " << c->branchIfTrue->GetPrintableName();
+				os << ", 1, " << c->branchIfTrue->GetIdName();
 
 			else
 				os << ", 0";
@@ -189,9 +192,9 @@ void FileOut::WriteCfgToFile(CFG *cfg, string fileName)
 				{
 					TransferEdge *te = c->transfers.at(k);
 					os << "\tTD(";
-					os << te->transOut->GetDAG()->GetPrintableName();
+					os << te->transOut->GetDAG()->GetIdName();
 					os << ", " << te->transOut->getId();
-					os << ", " << te->transIn->GetDAG()->GetPrintableName();
+					os << ", " << te->transIn->GetDAG()->GetIdName();
 					os << ", " << te->transIn->getId();
 					os << ")" << endl;
 				}
@@ -222,10 +225,10 @@ void FileOut::RecursiveExpressionGen(Expression *e, stringstream *ss)
 
 		if (e->operationType == OP_UNCOND)
 		{
-			// EXP(expId, operandType [TRUE, FALSE], unconditionalParentDagName)
+			// EXP(expId, operandType [TRUE, FALSE], operationType [UNCOND], unconditionalParentDagName)
 			*ss << ", " << exOperandTypes[e->operandType];
 			*ss << ", " << exOperationTypes[e->operationType];
-			*ss << ", " << e->unconditionalParent->GetPrintableName();
+			*ss << ", " << e->unconditionalParent->GetIdName();
 			*ss << ")" << endl;
 		}
 		else if (e->operationType == OP_GT || e->operationType == OP_LT
@@ -239,15 +242,15 @@ void FileOut::RecursiveExpressionGen(Expression *e, stringstream *ss)
 
 			if (e->operandType == OP_ONE_SENSOR)
 			{
-				*ss << ", " << e->sensor1->GetDAG()->GetPrintableName();
+				*ss << ", " << e->sensor1->GetDAG()->GetIdName();
 				*ss << ", " << e->sensor1->getId();
 				*ss << ", " << e->constant << ")" << endl;
 			}
 			else if (e->operandType == OP_TWO_SENSORS)
 			{
-				*ss << ", " << e->sensor1->GetDAG()->GetPrintableName();
+				*ss << ", " << e->sensor1->GetDAG()->GetIdName();
 				*ss << ", " << e->sensor1->getId();
-				*ss << ", " << e->sensor2->GetDAG()->GetPrintableName();
+				*ss << ", " << e->sensor2->GetDAG()->GetIdName();
 				*ss << ", " << e->sensor2->getId() << ")" << endl;
 			}
 			else

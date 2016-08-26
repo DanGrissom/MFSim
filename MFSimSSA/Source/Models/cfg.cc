@@ -71,6 +71,16 @@ DAG * CFG::AddNewDAG()
 }
 
 ///////////////////////////////////////////////////////////////
+// Adds existing DAG to the CFG; should be used primarily when
+// importing/reading a CFG with DAGs from a file.
+///////////////////////////////////////////////////////////////
+DAG * CFG::AddExistingDAG(DAG *dag)
+{
+	allDags.push_back(dag);
+	return dag;
+}
+
+///////////////////////////////////////////////////////////////
 // Create a new CG and add to the CFG; the returned CG can
 // be modified to specify the conditions.  Should point to an
 // assay/DAG in the CFG

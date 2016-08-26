@@ -1,0 +1,9 @@
+// DAG Specification for InitialThermocyclingStep3
+DAGNAME (InitialThermocyclingStep3)
+NODE (190, TRANSFER_IN, TIN1_InitialThermocyclingStep3)
+EDGE (190, 191)
+NODE (191, HEAT, 45, HT_1_InitialThermocyclingStep3)
+EDGE (191, 192)
+NODE (192, COOL, 45, HT_2_InitialThermocyclingStep3)
+EDGE (192, 193)
+NODE (193, TRANSFER_OUT, TOT1_InitialThermocyclingStep3)

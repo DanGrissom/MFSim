@@ -1,0 +1,9 @@
+// DAG Specification for FinishThermocyclingStep10
+DAGNAME (FinishThermocyclingStep10)
+NODE (223, TRANSFER_IN, TIN1_FinishThermocyclingStep10)
+EDGE (223, 224)
+NODE (224, HEAT, 45, HT_1_FinishThermocyclingStep10)
+EDGE (224, 225)
+NODE (225, COOL, 45, HT_2_FinishThermocyclingStep10)
+EDGE (225, 226)
+NODE (226, TRANSFER_OUT, TOT1_FinishThermocyclingStep10)

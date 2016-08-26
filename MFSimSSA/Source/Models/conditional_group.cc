@@ -88,6 +88,18 @@ void ConditionalGroup::addNewCondition(Expression *e, DAG *d, vector<TransferEdg
 }
 
 /////////////////////////////////////////////////////////////////////
+// Adds an existing condition to the conditional group. Should ONLY
+// be used when reading in a CFG from a file; otherwise, organizational
+// structure of conditional groups could easily get messed up.
+/////////////////////////////////////////////////////////////////////
+void ConditionalGroup::addExistingCondition(Condition *c)
+{
+	c->order = conditions->size();
+	conditions->push_back(c);
+}
+
+
+/////////////////////////////////////////////////////////////////////
 // Swap based on 0-based index
 /////////////////////////////////////////////////////////////////////
 void ConditionalGroup::swapConditions(int i1, int i2)

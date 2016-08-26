@@ -1,0 +1,5 @@
+// DAG Specification for DAG3
+DAGNAME (DAG3)
+NODE (34, TRANSFER_IN, TIN1_DAG3)
+EDGE (34, 35)
+NODE (35, OUTPUT, waste, WST1_DAG3)

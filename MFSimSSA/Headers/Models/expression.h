@@ -81,9 +81,12 @@ class Expression : public Entity
         string printExpression();
         bool evaluateExpression();
         void getParentDags(list<DAG *> *parents);
+    private:
+        Expression(int expId);
 
-        // Friend classes
-        friend class FileOut;
+	// Friend classes
+	friend class FileOut;
+	friend class FileIn;
 
  };
 #endif

@@ -1,0 +1,11 @@
+// DAG Specification for EarlyExitDetectionStep9
+DAGNAME (EarlyExitDetectionStep9)
+NODE (218, TRANSFER_IN, TIN1_EarlyExitDetectionStep9)
+EDGE (218, 219)
+NODE (219, HEAT, 45, HT_1_EarlyExitDetectionStep9)
+EDGE (219, 220)
+NODE (220, COOL, 45, HT_2_EarlyExitDetectionStep9)
+EDGE (220, 221)
+NODE (221, DETECT, 1, 5, DCT1_EarlyExitDetectionStep9)
+EDGE (221, 222)
+NODE (222, TRANSFER_OUT, TOT1_EarlyExitDetectionStep9)

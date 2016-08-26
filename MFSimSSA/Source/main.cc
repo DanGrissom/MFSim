@@ -84,14 +84,11 @@ int main(int argc, char **argv)
 			// SSA Dynamic System
 			Synthesis *synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/Testing/Arch_15_19_SampleReagent.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
 			//CFG *cfg = BiocodeTest::Create_Conditional_Demo_CFG(false);									// LS Pass; LEB Pass; RMR-R Pass
-			CFG *cfg = BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(false);		// LS Pass; LEB Pass; RMR-R Pass
-			//CFG *cfg = BiocodeTest::Create_Conditional_With_Transfer_Droplets_Demo_CFG(false);				// LS Pass; LEB Pass; RMR-R Pass (Merge case); Complete	 	//*Good Example
-			//CFG *cfg = BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(.8, false);					// LS Pass; LEB Pass; RMR-R Pass
-			//CFG *cfg = BiocodeTest::Create_Conditional_Probabilistic_PCR_CFG(.8, false);						// LS Pass; LEB Pass; RMR-R Pass
-
-			FileOut::WriteCfgToFile(cfg, "Output/" + cfg->getName() + ".txt");
-			return 0;
-
+			//CFG *cfg = BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(false);		// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
+			CFG *cfg = BiocodeTest::Create_Compound_Conditional_With_Transfer_Droplets_Demo_CFG(false);
+			//CFG *cfg = BiocodeTest::Create_Conditional_With_Transfer_Droplets_Demo_CFG(false);				// LS Pass; LEB Pass; RMR-R Pass (Merge case); Complete; File I/O Pass	 	//*Good Example
+			//CFG *cfg = BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(.8, false);					// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
+			//CFG *cfg = BiocodeTest::Create_Conditional_Probabilistic_PCR_CFG(.8, false);						// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
 
 			//Synthesis *synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
 			//CFG *cfg = BiocodeTest::Create_Conditional_B2_InVitroDiag_CFG(4, 4, "none", 1, 1, 1, false);		// LS Pass; LEB Pass; RMR-R Pass
@@ -99,11 +96,16 @@ int main(int argc, char **argv)
 			//Synthesis *synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
 			//CFG *cfg = BiocodeTest::Create_Conditional_B3_Protein_FaultTolerant_CFG(1, 1, 1, false);			// LS Pass; LEB Pass; RMR-R Pass (Merge cases)
 
-			CompiledCFG *compiledCFG = new CompiledCFG(synthesisEngine, cfg);
+			// Testing CFG file I/O methods
+			FileOut::WriteCfgToFile(cfg, "Test/", cfg->getName() + ".cfg");
+			CFG *cfgIn = FileIn::ReadCfgFromFile("Test/" +  cfg->getName() + ".cfg");
+
+			CompiledCFG *compiledCFG = new CompiledCFG(synthesisEngine, cfgIn);
 			compiledCFG->execute();
 			compiledCFG->outputSimulationFiles();
 			delete compiledCFG;
 			delete cfg;
+			delete cfgIn;
 
 			cout << "-----------------------------------------------" << endl << "Exiting the UCR DMFB SSS Simulator" << endl;
 		}

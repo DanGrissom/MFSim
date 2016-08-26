@@ -1,0 +1,9 @@
+// DAG Specification for ThermoHeadStep2
+DAGNAME (ThermoHeadStep2)
+NODE (117, TRANSFER_IN, TIN1_ThermoHeadStep2)
+EDGE (117, 118)
+NODE (118, HEAT, 20, HT_1_ThermoHeadStep2)
+EDGE (118, 119)
+NODE (119, DETECT, 1, 0.1, DCT1_ThermoHeadStep2)
+EDGE (119, 120)
+NODE (120, TRANSFER_OUT, TOT1_ThermoHeadStep2)

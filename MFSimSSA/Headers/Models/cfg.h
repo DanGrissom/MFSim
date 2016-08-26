@@ -59,6 +59,7 @@ class CFG
 		// Methods
 		DAG * AddNewDAG(string name);
 		DAG * AddNewDAG();
+		DAG * AddExistingDAG(DAG *dag);
 
 		ConditionalGroup * AddNewCG();
 

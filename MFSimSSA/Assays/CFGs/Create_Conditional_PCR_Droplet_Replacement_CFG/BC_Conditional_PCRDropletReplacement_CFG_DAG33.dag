@@ -1,0 +1,9 @@
+// DAG Specification for TailStep1
+DAGNAME (TailStep1)
+NODE (149, TRANSFER_IN, TIN1_TailStep1)
+EDGE (149, 150)
+NODE (150, HEAT, 30, HT_1_TailStep1)
+EDGE (150, 151)
+NODE (151, HEAT, 45, HT_2_TailStep1)
+EDGE (151, 152)
+NODE (152, TRANSFER_OUT, TOT1_TailStep1)

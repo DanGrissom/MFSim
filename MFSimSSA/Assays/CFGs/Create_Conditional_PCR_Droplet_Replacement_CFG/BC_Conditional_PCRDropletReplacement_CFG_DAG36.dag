@@ -1,0 +1,9 @@
+// DAG Specification for TailStep4
+DAGNAME (TailStep4)
+NODE (161, TRANSFER_IN, TIN1_TailStep4)
+EDGE (161, 162)
+NODE (162, HEAT, 30, HT_1_TailStep4)
+EDGE (162, 163)
+NODE (163, HEAT, 45, HT_2_TailStep4)
+EDGE (163, 164)
+NODE (164, TRANSFER_OUT, TOT1_TailStep4)

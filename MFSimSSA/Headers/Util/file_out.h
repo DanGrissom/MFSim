@@ -59,7 +59,7 @@ class FileOut
 
 		// File Output Methods
 		static void WriteDagToFile(DAG *dag, string fileName);
-		static void WriteCfgToFile(CFG *cfg, string fileName);
+		static void WriteCfgToFile(CFG *cfg, string directory, string fileName);
 		static void WriteScheduledDagAndArchToFile(DAG *dag, DmfbArch *arch,  Scheduler *scheduler, string fileName);
 		static void WritePlacedDagAndArchToFile(DAG *dag, DmfbArch *arch, Placer *placer, vector<ReconfigModule *> *rModules, string fileName);
 		static void WriteRoutedDagAndArchToFile(DAG *dag, DmfbArch *arch, Router *router, vector<ReconfigModule *> *rModules, map<Droplet *, vector<RoutePoint *> *> *routes, vector<vector<RoutePoint*> *> *dirtyCells, vector<vector<int> *> *pinActivations, vector<unsigned long long> *tsBeginningCycle, string fileName);

@@ -1,0 +1,11 @@
+// DAG Specification for ReactantReplenishStep5
+DAGNAME (ReactantReplenishStep5)
+NODE (89, DISPENSE, ReplacementMix, 10, DIS1_ReactantReplenishStep5)
+EDGE (89, 90)
+NODE (90, HEAT, 45, HT_1_ReactantReplenishStep5)
+EDGE (90, 92)
+NODE (91, TRANSFER_IN, TIN1_ReactantReplenishStep5)
+EDGE (91, 92)
+NODE (92, MIX, 2, 1, MIX1_ReactantReplenishStep5)
+EDGE (92, 93)
+NODE (93, TRANSFER_OUT, TOT1_ReactantReplenishStep5)

@@ -66,6 +66,7 @@ class ConditionalGroup
         // Methods
         void addNewCondition(Expression *e, DAG *d);
         void addNewCondition(Expression *e, DAG *d, vector<TransferEdge *> transferEdges);
+        void addExistingCondition(Condition *c);
         void swapConditions(int i1, int i2);
         void deleteCondition(int i);
         void deleteCondition(Condition *c);
