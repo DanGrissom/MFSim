@@ -70,6 +70,7 @@ public:
         // Constructors
 		BioExpression(string s1, ExOperationType ot, string s2); // Two-sensor constructor
 		BioExpression(string s1, ExOperationType ot, double c); // One-sensor constructor
+		BioExpression(BioCoder *repeatableAssay, ExOperationType ot, double runCount); // Run-count constructor
 		BioExpression(BioExpression *notExp); // NOT constructor
 		BioExpression(ExOperationType andOr); // AND/OR constructor
 		BioExpression(BioCoder *uncondPar, bool unconditional); // Either unconditionally true or false

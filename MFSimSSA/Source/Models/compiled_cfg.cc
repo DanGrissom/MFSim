@@ -343,6 +343,7 @@ void CompiledCFG::dynamicallyExecute()
 			executingDAG->SimulateSensorReadings();
 			CompiledDAG *compExecutingDAG = uncompToCompDAG->at(executingDAG);
 			executingDAG->status = RUN_FINISHED;
+			executingDAG->IncrementRunCount();
 			executeCompiledDag(compExecutingDAG, totalTS, totalCycles, false);
 
 			// Print simple statistics for the assay that was just executed

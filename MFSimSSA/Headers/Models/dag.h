@@ -55,6 +55,7 @@ class DAG : public Entity
 		list<ConditionalGroup *> conditionalGroups;
 		list<ConditionalGroup *> cgsLeftToProcess;
 		DagStatus status;
+		int runCount;
 		unsigned long long freqInHz;
 		static int orderNum;
 		string name;
@@ -67,6 +68,8 @@ class DAG : public Entity
 		void ReInitAssay();
 		void ReInitSensorReadings();
 		void SimulateSensorReadings();
+		void IncrementRunCount() { runCount++; }
+		void ResetRunCount() { runCount = 0; }
 
 	public:
 		// Constructors
@@ -111,6 +114,7 @@ class DAG : public Entity
 		void setFreq(unsigned long long freqHz);
 		void setName(string n) { name = n; }
 		string getName() { return name; }
+		int getRunCount() { return runCount; }
 		AssayNode * getNode(int id);
 		vector<AssayNode *> getAllNodes() { return allNodes; }
 		vector<AssayNode *> getAllInputNodes() { return heads; }

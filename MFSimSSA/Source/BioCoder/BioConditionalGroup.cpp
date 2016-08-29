@@ -286,7 +286,16 @@ Expression *BioConditionalGroup::recursiveConvert(BioExpression *be, vector<DAG*
 		}
 		return newExp;
 	}
+	else if (be->operandType == OP_RUN_COUNT)
+	{
+		// Search for the correct DAG and create appropriate Expression
+		for(int j=0; j < dags->size(); ++j)
+			if(be->unconditionalParent->getName() == dags->at(j)->getName())
+				return new Expression(dags->at(j), be->operationType, be->constant);
 
+		claim(false, "Could not find repeatable DAG (it is possibly NULL)");
+		return NULL;
+	}
 	else
 		return NULL;
 }

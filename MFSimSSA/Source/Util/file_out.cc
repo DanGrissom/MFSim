@@ -149,11 +149,11 @@ void FileOut::WriteCfgToFile(CFG *cfg, string directory, string fileName)
 
 			// For file readability, output the IF, ELSE-IF, ELSE construct as a comment
 			if (j == 0)
-				os << "// IF " << c->statement->printExpression() << ":" << endl;
+				os << "// IF " << c->statement->printExpression(false) << ":" << endl;
 			else if (j == cg->getConditions()->size() - 1)
-				os << "// ELSE " << c->statement->printExpression() << ":" << endl;
+				os << "// ELSE " << c->statement->printExpression(false) << ":" << endl;
 			else
-				os << "// ELSE-IF " << c->statement->printExpression() << ":" << endl;
+				os << "// ELSE-IF " << c->statement->printExpression(false) << ":" << endl;
 
 			// Output conditionalGroupId and numDependentDAGs
 			os << "\tCOND(" << i << ", " << c->dependents.size();
@@ -236,7 +236,7 @@ void FileOut::RecursiveExpressionGen(Expression *e, stringstream *ss)
 		{
 			// EXP(expId, operandType [ONE_SENSOR], operationType [GT, GoE, LT, LoE, EQUAL], op1SensorDagName, op1SensorNodeId, op2StaticVal)
 			// EXP(expId, operandType [TWO_SENSORS], operationType [GT, GoE, LT, LoE, EQUAL], op1SensorDagName, op1SensorNodeId, op2SensorDagName, op2SensorNodeId,)
-			// EXP(expId, operandType [RUN_COUNT], operationType [GT, GoE, LT, LoE, EQUAL], op1StaticVal)
+			// EXP(expId, operandType [RUN_COUNT], repeatableDagName, operationType [GT, GoE, LT, LoE, EQUAL], runCount)
 			*ss << ", " << exOperandTypes[e->operandType];
 			*ss << ", " << exOperationTypes[e->operationType];
 
@@ -253,8 +253,13 @@ void FileOut::RecursiveExpressionGen(Expression *e, stringstream *ss)
 				*ss << ", " << e->sensor2->GetDAG()->GetIdName();
 				*ss << ", " << e->sensor2->getId() << ")" << endl;
 			}
+			else if (e->operandType == OP_RUN_COUNT)
+			{
+				*ss << ", " << e->unconditionalParent->GetIdName();
+				*ss << ", " << e->constant << ")" << endl;
+			}
 			else
-				*ss << "---ERROR---" << ")" << endl;;
+				claim(false, "Unsupported operandType: FileOut::RecursiveExpressionGen().");
 		}
 		else if (e->operationType == OP_AND || e->operationType == OP_OR)
 		{

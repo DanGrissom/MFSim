@@ -151,11 +151,11 @@ void ConditionalGroup::printConditionalGroup()
 	{
 		Expression *s = conditions->at(i)->statement;
 		if (i == 0)
-			cout << "IF " << s->printExpression() << endl << "\t// Do something" << endl;
+			cout << "IF " << s->printExpression(false) << endl << "\t// Do something" << endl;
 		else if (i == conditions->size()-1)
-			cout << "ELSE //" << s->printExpression() << endl << "\t// Do something" << endl;
+			cout << "ELSE //" << s->printExpression(false) << endl << "\t// Do something" << endl;
 		else
-			cout << "ELSE IF " << s->printExpression() << endl << "\t// Do something" << endl;
+			cout << "ELSE IF " << s->printExpression(false) << endl << "\t// Do something" << endl;
 	}
 }
 /////////////////////////////////////////////////////////////////////
@@ -202,7 +202,7 @@ Condition * ConditionalGroup::evaluateAndDbPrint(stringstream *ifElseFlowResults
 		Expression *s = c->statement;
 		if (i == 0) // "IF"
 		{
-			*ifElseFlowResults << "IF " << s->printExpression() << "\n"; // DEBUG PRINT
+			*ifElseFlowResults << "IF " << s->printExpression(true) << "\n"; // DEBUG PRINT
 			if (s->evaluateExpression())
 			{
 				*ifElseFlowResults << "\tTRUE";
@@ -222,7 +222,7 @@ Condition * ConditionalGroup::evaluateAndDbPrint(stringstream *ifElseFlowResults
 		}
 		else if (i == conditions->size()-1) // "ELSE"
 		{
-			*ifElseFlowResults << "ELSE // " << s->printExpression() << "\n"; // DEBUG PRINT
+			*ifElseFlowResults << "ELSE // " << s->printExpression(true) << "\n"; // DEBUG PRINT
 			if (c->branchIfTrue)
 				*ifElseFlowResults << "\tBranching to " << c->branchIfTrue->GetPrintableName() << "\n";
 			else
@@ -232,7 +232,7 @@ Condition * ConditionalGroup::evaluateAndDbPrint(stringstream *ifElseFlowResults
 		}
 		else // "ELSE-IF"
 		{
-			*ifElseFlowResults << "ELSE-IF " << s->printExpression() << "\n"; // DEBUG PRINT
+			*ifElseFlowResults << "ELSE-IF " << s->printExpression(true) << "\n"; // DEBUG PRINT
 			if (s->evaluateExpression())
 			{
 				*ifElseFlowResults << "\tTRUE";

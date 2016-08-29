@@ -16,7 +16,7 @@
 ***********************************************************************************************
 *                                        Revisions List                                       *
 ***********************************************************************************************
-Jul X, 2014 (v4.0)
+Sep X, 2016 (v4.0)
 General (applicable to multiple projects)
 -----------------------------------------
 
@@ -41,6 +41,9 @@ MFSimStatic Changes (C++)
   and Create_Conditional_Probabilistic_PCR_CFG(), thanks to Chris Curtis)
 - Added a new CFG output which shows the execution path through a particular CFG run, clearly showing
   the conditions that were evaluated and the routing vs. functional DAGs (CFG nodes)
+- Added File I/O for control-flow graphs (CFGs) in file_out.cc/h and file_in.cc/h
+- Added control-flow support (in BioCoder and in MFSimSSA simulator) for run-count such that a CFG
+  transition can branch based on how many times a DAG (i.e., CFG node) has been executed
 
 
 MFSimStaticGUI Changes (Java)

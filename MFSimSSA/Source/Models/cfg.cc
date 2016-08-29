@@ -198,11 +198,11 @@ void CFG::OutputGraphFile(string filename, bool outputDAGs, bool color, bool ful
 					if (fullStats)
 					{
 						if (j == 0) // "IF"
-							out << "fontcolor=\"#" << color << "\", label=\"IF" << c->statement->printExpression() << "\", ";
+							out << "fontcolor=\"#" << color << "\", label=\"IF" << c->statement->printExpression(false) << "\", ";
 						else if (j == cg->getConditions()->size()-1) // "ELSE"
-							out << "fontcolor=\"#" << color << "\", label=\"ELSE //" << c->statement->printExpression() << "\", ";
+							out << "fontcolor=\"#" << color << "\", label=\"ELSE //" << c->statement->printExpression(false) << "\", ";
 						else // "ELSE-IF
-							out << "fontcolor=\"#" << color << "\", label=\"ELSE_IF" << c->statement->printExpression() << "\", ";
+							out << "fontcolor=\"#" << color << "\", label=\"ELSE_IF" << c->statement->printExpression(false) << "\", ";
 					}
 
 					out << "color=\"#" << color << "\"]";
@@ -251,7 +251,16 @@ void CFG::ConstructAndValidateCFG()
 				//cout << "Didn't add TI " << c->transfers.at(j)->transIn->GetDAG()->getName() << endl;
 			}
 
-			heads.remove(c->branchIfTrue); // Not a header if something branches to it
+			// Check if DAG a is branching to DAG b, then DAG b
+			// is not a header DAG (unless a == b, in which case
+			// b may still be a header DAG)
+			bool mayBeHeaderDag = false;
+			for (DAG * d : c->dependents)
+				if (d == c->branchIfTrue)
+					mayBeHeaderDag = true;
+			if (!mayBeHeaderDag)
+				heads.remove(c->branchIfTrue);
+
 			if (i == cg->getConditions()->size()-1 && cg->getConditions()->size() > 1) // ELSE statement
 			{	// The dependents of an ELSE statement are the unique dependents of the related IF/IF-ELSE statements
 				for (int j = 0; j < cg->getConditions()->size()-1; j++)

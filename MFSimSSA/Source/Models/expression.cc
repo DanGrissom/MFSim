@@ -97,6 +97,31 @@ Expression::Expression(AssayNode *s1, ExOperationType ot, double c)
 	sensor2 = NULL;
 	unconditionalParent = NULL;
 }
+
+/////////////////////////////////////////////////////////////////////
+// Creating an BioExpression that compares the run count of a repeatable
+// assay (eventually, a DAG) to a static runcount (constant runCount)
+/////////////////////////////////////////////////////////////////////
+Expression::Expression(DAG *repeatableDag, ExOperationType ot, double runCount)
+{
+	{	// Sanity check: Must be proper operation type
+		if (!(ot == OP_GT || ot == OP_LT || ot == OP_GoE || ot == OP_LoE || ot == OP_EQUAL)	|| !repeatableDag)
+		{
+			stringstream msg;
+			msg << "ERROR. >, <, <=, >=, == operations allowed for a sensor-sensor comparison. Must be valid assay/dag being checked for repetition." << ends;
+			claim(false, &msg);
+		}
+	}
+	id = next_id++;
+	operationType = ot;
+	operands = NULL;
+	operandType = OP_RUN_COUNT;
+	constant = runCount;
+	sensor1 = NULL;
+	sensor2 = NULL;
+	unconditionalParent = repeatableDag;
+}
+
 /////////////////////////////////////////////////////////////////////
 // Creating an expression that performs a NOT operation
 /////////////////////////////////////////////////////////////////////
@@ -161,7 +186,7 @@ Expression::~Expression()
 	{
 		// TODO: Traverse and do recursive delete...MAYBE
 		//for (int i = 0; i < operands->size(); i++)
-			//recursiveDelete();
+		//recursiveDelete();
 
 		operands->clear();
 		delete operands;
@@ -225,15 +250,17 @@ bool Expression::recursiveValidate(Expression *e)
 	return true;
 }
 /////////////////////////////////////////////////////////////////////
-// Prints the boolean expression.
+// Prints the boolean expression. If printLiveValues is set, prints
+// live values of the sensors, run-count, etc.; if not, then just
+// prints the inequality w/o live values.
 /////////////////////////////////////////////////////////////////////
-string Expression::printExpression()
+string Expression::printExpression(bool printLiveValues)
 {
 	stringstream ss;
-	recursivePrint(this, &ss);
+	recursivePrint(this, &ss, printLiveValues);
 	return ss.str();
 }
-void Expression::recursivePrint(Expression *e, stringstream *ss)
+void Expression::recursivePrint(Expression *e, stringstream *ss, bool printLiveValues)
 {
 	if (!e)
 	{
@@ -252,7 +279,22 @@ void Expression::recursivePrint(Expression *e, stringstream *ss)
 	else if (e->operationType == OP_GT || e->operationType == OP_LT
 			|| e->operationType == OP_GoE || e->operationType == OP_LoE || e->operationType == OP_EQUAL)
 	{
-		*ss << e->sensor1->GetName() << "_READ = " << e->sensor1->GetReading();
+		// Print out run-count or sensor-reading
+		if (printLiveValues)
+		{
+			if (e->operandType == OP_RUN_COUNT)
+				*ss << e->unconditionalParent->GetIdName() << "_RUN_COUNT = " << e->unconditionalParent->getRunCount();
+			else // 1- or 2-Sensor reading
+				*ss << e->sensor1->GetName() << "_READ = " << e->sensor1->GetReading();
+		}
+		else
+		{
+			if (e->operandType == OP_RUN_COUNT)
+				*ss << e->unconditionalParent->GetIdName() << "_RUN_COUNT";
+			else // 1- or 2-Sensor reading
+				*ss << e->sensor1->GetName() << "_READ";
+		}
+
 		if (e->operationType == OP_GT)
 			*ss << " > ";
 		else if (e->operationType == OP_LT)
@@ -266,18 +308,23 @@ void Expression::recursivePrint(Expression *e, stringstream *ss)
 		else
 			*ss << " ??? ";
 
-		if (e->operandType == OP_ONE_SENSOR)
+		if (e->operandType == OP_ONE_SENSOR || e->operandType == OP_RUN_COUNT)
 			*ss << e->constant;
 		else if (e->operandType == OP_TWO_SENSORS)
-			*ss << e->sensor2->GetName() << "_READ = " << e->sensor2->GetReading();
+		{
+			if (printLiveValues)
+				*ss << e->sensor2->GetName() << "_READ = " << e->sensor2->GetReading();
+			else
+				*ss << e->sensor2->GetName() << "_READ";
+		}
 		else
-			*ss << "---ERROR---";
+			claim(false, "Unsupported operand type: Expression::recursivePrint()");
 	}
 	else if (e->operationType == OP_AND || e->operationType == OP_OR)
 	{
 		for (int i = 0; i < e->operands->size(); i++)
 		{
-			recursivePrint(e->operands->at(i), ss);
+			recursivePrint(e->operands->at(i), ss, printLiveValues);
 			if (i < e->operands->size()-1 && e->operationType == OP_AND)
 				*ss << " AND ";
 			else if (i < e->operands->size()-1 && e->operationType == OP_OR)
@@ -288,10 +335,10 @@ void Expression::recursivePrint(Expression *e, stringstream *ss)
 	else if (e->operationType == OP_NOT)
 	{
 		*ss << " NOT";
-		recursivePrint(e->operands->front(), ss);
+		recursivePrint(e->operands->front(), ss, printLiveValues);
 	}
 	else
-		*ss << "---ERROR---";
+		claim(false, "Unsupported operation/operand type: Expression::recursivePrint().");
 	*ss << ")";
 }
 
@@ -321,23 +368,40 @@ bool Expression::recursiveEvaluate(Expression *e)
 			|| e->operationType == OP_GoE || e->operationType == OP_LoE || e->operationType == OP_EQUAL)
 	{
 		{	// Sanity check: Detect nodes must be done
-			stringstream msg;
-			msg << "ERROR. Detect sensor " << e->sensor1->GetName() << " status must be 'complete'." << endl;
-			claim(e->sensor1->GetStatus() == COMPLETE , &msg);
+			if (e->sensor1)
+			{
+				stringstream msg;
+				msg << "ERROR. Detect sensor " << e->sensor1->GetName() << " status must be 'complete'." << endl;
+				claim(e->sensor1->GetStatus() == COMPLETE , &msg);
+			}
+
 			if (e->sensor2)
 			{
-				stringstream msg2;
-				msg2 << "ERROR. Detect sensor " << e->sensor2->GetName() << " status must be 'complete'." << endl;
-				claim(e->sensor2->GetStatus() == COMPLETE , &msg2);
+				stringstream msg;
+				msg << "ERROR. Detect sensor " << e->sensor2->GetName() << " status must be 'complete'." << endl;
+				claim(e->sensor2->GetStatus() == COMPLETE , &msg);
 			}
 		}
 
-		double lhs = e->sensor1->GetReading();
+		double lhs;
 		double rhs;
 		if (e->operandType == OP_ONE_SENSOR)
+		{
+			lhs = e->sensor1->GetReading();
 			rhs = e->constant;
+		}
 		else if (e->operandType == OP_TWO_SENSORS)
+		{
+			lhs = e->sensor1->GetReading();
 			rhs = e->sensor2->GetReading();
+		}
+		else if (e->operandType == OP_RUN_COUNT)
+		{
+			lhs = e->unconditionalParent->getRunCount();
+			rhs = e->constant;
+		}
+		else
+			claim(false, "Unsupported operand type.");
 
 		if (e->operationType == OP_GT)
 			return lhs > rhs;
@@ -389,14 +453,24 @@ void Expression::recursiveGetParents(Expression *e, list<DAG *> *parents)
 	if (e->operationType == OP_GT || e->operationType == OP_LT
 			|| e->operationType == OP_GoE || e->operationType == OP_LoE || e->operationType == OP_EQUAL)
 	{
-		parents->remove(e->sensor1->GetDAG());
-		parents->push_back(e->sensor1->GetDAG());
-
-		if (e->operandType == OP_TWO_SENSORS)
+		if (e->operandType == OP_RUN_COUNT)
 		{
-			parents->remove(e->sensor2->GetDAG());
-			parents->push_back(e->sensor2->GetDAG());
+			parents->remove(e->unconditionalParent);
+			parents->push_back(e->unconditionalParent);
 		}
+		else if (e->operandType == OP_ONE_SENSOR || e->operandType == OP_TWO_SENSORS)
+		{
+			parents->remove(e->sensor1->GetDAG());
+			parents->push_back(e->sensor1->GetDAG());
+
+			if (e->operandType == OP_TWO_SENSORS)
+			{
+				parents->remove(e->sensor2->GetDAG());
+				parents->push_back(e->sensor2->GetDAG());
+			}
+		}
+		else
+			claim(false, "Unsupported operandType in Expression:recursiveGetParents().");
 	}
 	else if (e->operationType != OP_UNCOND)
 	{

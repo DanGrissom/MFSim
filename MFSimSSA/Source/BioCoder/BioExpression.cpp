@@ -72,6 +72,31 @@ BioExpression::BioExpression(string s1, ExOperationType ot, double c)
 	sensor2 = "";
 	this->s1=NULL;
 }
+
+/////////////////////////////////////////////////////////////////////
+// Creating an BioExpression that compares the run count of a repeatable
+// assay (eventually, a DAG) to a static runcount (constant runCount)
+/////////////////////////////////////////////////////////////////////
+BioExpression::BioExpression(BioCoder *repeatableAssay, ExOperationType ot, double runCount)
+{
+	{	// Sanity check: Must be proper operation type
+		if (!(ot == OP_GT || ot == OP_LT || ot == OP_GoE || ot == OP_LoE || ot == OP_EQUAL)	)
+		{
+			std::stringstream msg;
+			msg << "ERROR. >, <, <=, >=, == operations allowed for a run-count comparison." << ends;
+			claim(false, &msg);
+		}
+	}
+	operationType = ot;
+	operands = NULL;
+	operandType = OP_RUN_COUNT;
+	constant = runCount;
+	sensor1 = "";
+	sensor2 = "";
+	this->s1=NULL;
+	unconditionalParent = repeatableAssay;
+}
+
 /////////////////////////////////////////////////////////////////////
 // Creating an BioExpression that performs a NOT operation
 /////////////////////////////////////////////////////////////////////

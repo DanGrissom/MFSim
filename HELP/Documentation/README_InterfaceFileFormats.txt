@@ -52,7 +52,7 @@ COND (conditionalGroupId, numDependentDAGs, firstDependentDAG, .... , lastDepend
 EXP (expId, operandType [TRUE, FALSE], operationType [UNCOND], unconditionalParentDagName)
 EXP (expId, operandType [ONE_SENSOR], operationType [GT, GoE, LT, LoE, EQUAL], op1SensorDagName, op1SensorNodeId, op2StaticVal)
 EXP (expId, operandType [TWO_SENSORS], operationType [GT, GoE, LT, LoE, EQUAL], op1SensorDagName, op1SensorNodeId, op2SensorDagName, op2SensorNodeId,)
-EXP (expId, operandType [RUN_COUNT], operationType [GT, GoE, LT, LoE, EQUAL], op1StaticVal)
+EXP (expId, operandType [RUN_COUNT], operationType [GT, GoE, LT, LoE, EQUAL], repeatableDagName, runCount)
 EXP (expId, operandType [SUB_EXP], operationType [AND, OR], subExp1Id, subExp2Id)
 EXP (expId, operandType [EXP], operationType [NOT], subExpId)
 TD (transOutDag, transOutNodeId, transInDag, transInNodeId)

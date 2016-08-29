@@ -57,7 +57,7 @@ class Expression : public Entity
 
 		// Methods
 		static bool recursiveValidate(Expression *e);
-		static void recursivePrint(Expression *e, stringstream *ss);
+		static void recursivePrint(Expression *e, stringstream *ss, bool printLiveValues);
 		static bool recursiveEvaluate(Expression *e);
 		static void recursiveGetParents(Expression *e, list<DAG *> *parents);
 
@@ -67,6 +67,7 @@ class Expression : public Entity
 		//Expression();
 		Expression(AssayNode *s1, ExOperationType ot, AssayNode *s2); // Two-sensor constructor
 		Expression(AssayNode *s1, ExOperationType ot, double c); // One-sensor constructor
+		Expression(DAG *repeatableDag, ExOperationType ot, double runCount); // Run-count constructor
 		Expression(Expression *notExp); // NOT constructor
 		Expression(ExOperationType andOr); // AND/OR constructor
 		Expression(DAG *unconPar, bool unconditional); // Either unconditionally true or false
@@ -78,7 +79,7 @@ class Expression : public Entity
         // Methods
         void addOperand(Expression *op);
         bool isValidExpression();
-        string printExpression();
+        string printExpression(bool printLiveValues);
         bool evaluateExpression();
         void getParentDags(list<DAG *> *parents);
     private:

@@ -83,9 +83,10 @@ int main(int argc, char **argv)
 
 			// SSA Dynamic System
 			Synthesis *synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/Testing/Arch_15_19_SampleReagent.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
-			//CFG *cfg = BiocodeTest::Create_Conditional_Demo_CFG(false);									// LS Pass; LEB Pass; RMR-R Pass
-			//CFG *cfg = BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(false);		// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
-			CFG *cfg = BiocodeTest::Create_Compound_Conditional_With_Transfer_Droplets_Demo_CFG(false);
+			//CFG *cfg = BiocodeTest::Create_Conditional_Demo_CFG(false);										// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
+			//CFG *cfg = BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(false);			// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
+			//CFG *cfg = BiocodeTest::Create_Compound_Conditional_With_Transfer_Droplets_Demo_CFG(false);		// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
+			CFG *cfg = BiocodeTest::Create_Conditional_Runcount_With_Transfer_Droplets_Demo_CFG(false);			// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
 			//CFG *cfg = BiocodeTest::Create_Conditional_With_Transfer_Droplets_Demo_CFG(false);				// LS Pass; LEB Pass; RMR-R Pass (Merge case); Complete; File I/O Pass	 	//*Good Example
 			//CFG *cfg = BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(.8, false);					// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
 			//CFG *cfg = BiocodeTest::Create_Conditional_Probabilistic_PCR_CFG(.8, false);						// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
@@ -97,15 +98,15 @@ int main(int argc, char **argv)
 			//CFG *cfg = BiocodeTest::Create_Conditional_B3_Protein_FaultTolerant_CFG(1, 1, 1, false);			// LS Pass; LEB Pass; RMR-R Pass (Merge cases)
 
 			// Testing CFG file I/O methods
-			FileOut::WriteCfgToFile(cfg, "Test/", cfg->getName() + ".cfg");
-			CFG *cfgIn = FileIn::ReadCfgFromFile("Test/" +  cfg->getName() + ".cfg");
+			//FileOut::WriteCfgToFile(cfg, "Test/", cfg->getName() + ".cfg");
+			//CFG *cfgIn = FileIn::ReadCfgFromFile("Test/" +  cfg->getName() + ".cfg");
 
-			CompiledCFG *compiledCFG = new CompiledCFG(synthesisEngine, cfgIn);
+			CompiledCFG *compiledCFG = new CompiledCFG(synthesisEngine, cfg);
 			compiledCFG->execute();
 			compiledCFG->outputSimulationFiles();
 			delete compiledCFG;
 			delete cfg;
-			delete cfgIn;
+			//delete cfgIn;
 
 			cout << "-----------------------------------------------" << endl << "Exiting the UCR DMFB SSS Simulator" << endl;
 		}

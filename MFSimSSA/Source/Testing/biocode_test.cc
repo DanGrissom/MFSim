@@ -159,8 +159,8 @@ DAG *BiocodeTest::Create_B2_InVitroDiag(int numSamples, int numReagents)
 	bio->end_protocol();
 	bio->Translator(dag);
 
-    cout << "BioCoder Bench_InVitroDiag(Samples=" << numSamples << ", Reagents=" << numReagents << ")  CREATED" << endl;
-    return dag;
+	cout << "BioCoder Bench_InVitroDiag(Samples=" << numSamples << ", Reagents=" << numReagents << ")  CREATED" << endl;
+	return dag;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -379,8 +379,8 @@ DAG *BiocodeTest::Create_Operation_Demonstration_Bench()
 	bio->end_protocol();
 	bio->Translator(dag);
 
-    cout << "Operation_Demo_Benchmark CREATED" << endl;
-    return dag;
+	cout << "Operation_Demo_Benchmark CREATED" << endl;
+	return dag;
 }
 
 
@@ -715,8 +715,8 @@ CFG * BiocodeTest::Create_Conditional_Demo_CFG(bool outputBiocoderGraphs)
 	CFG *cfg = BioSys->GetDmfbExecutableCFG();
 	cfg->setName("BC_Conditional_CFG");
 	cfg->OutputGraphFile(cfg->getName(), true, true, true);
-    cout << "BioCoder Conditional CFG Generated" << endl;
-    return cfg;
+	cout << "BioCoder Conditional CFG Generated" << endl;
+	return cfg;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -851,8 +851,8 @@ CFG * BiocodeTest::Create_Conditional_With_Transfer_Droplets_Demo_CFG(bool outpu
 	CFG *cfg = BioSys->GetDmfbExecutableCFG();
 	cfg->setName("BC_Conditional_TransferDrops_CFG");
 	cfg->OutputGraphFile(cfg->getName(), true, true, true);
-    cout << "BioCoder Conditional w/ Transfer Droplets CFG Generated" << endl;
-    return cfg;
+	cout << "BioCoder Conditional w/ Transfer Droplets CFG Generated" << endl;
+	return cfg;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -866,8 +866,8 @@ CFG * BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(boo
 
 	string d1;
 	string to;
-	string ti_save;
-	string ti_waste;
+	string tiSave;
+	string tiWaste;
 
 	// Creation of BioSystem
 	BioSystem * BioSys= new BioSystem();
@@ -896,7 +896,7 @@ CFG * BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(boo
 	tube = bioSave->new_container(STERILE_MICROFUGE_TUBE2ML);
 	dropVol = bioSave->vol(10, UL);
 	bioSave->first_step("Transfer In");
-	ti_save = bioSave->reuse_fluid(tube);
+	tiSave = bioSave->reuse_fluid(tube);
 	bioSave->next_step("Save this fluid");
 	bioSave->drain(tube, "save");
 	bioSave->end_protocol();
@@ -906,7 +906,7 @@ CFG * BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(boo
 	tube = bioWaste->new_container(STERILE_MICROFUGE_TUBE2ML);
 	dropVol = bioWaste->vol(10, UL);
 	bioWaste->first_step("Transfer In");
-	ti_waste = bioWaste->reuse_fluid(tube);
+	tiWaste = bioWaste->reuse_fluid(tube);
 	bioWaste->next_step("Discard this fluid");
 	bioWaste->drain(tube, "waste");
 	bioWaste->end_protocol();
@@ -915,16 +915,16 @@ CFG * BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(boo
 	BioConditionalGroup *bcg = BioSys->addBioCondGroup();
 	BioExpression *be = new BioExpression(d1, OP_LT, 0.5);
 	BioCondition *bc = bcg->addNewCondition(be, bioSave);
-	bc->addTransferDroplet(to, ti_save);
+	bc->addTransferDroplet(to, tiSave);
 	bc = bcg->addNewCondition(NULL, bioWaste);
-	bc->addTransferDroplet(to, ti_waste);
+	bc->addTransferDroplet(to, tiWaste);
 
 	// Generate CFG from Biocoder and output CFG and all DAGs
 	CFG *cfg = BioSys->GetDmfbExecutableCFG();
 	cfg->setName("BC_Simple_Conditional_TransferDrops_CFG");
 	cfg->OutputGraphFile(cfg->getName(), true, true, true);
-    cout << "BioCoder Simple Conditional w/ Transfer Droplets CFG Generated" << endl;
-    return cfg;
+	cout << "BioCoder Simple Conditional w/ Transfer Droplets CFG Generated" << endl;
+	return cfg;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -939,8 +939,8 @@ CFG * BiocodeTest::Create_Compound_Conditional_With_Transfer_Droplets_Demo_CFG(b
 	string d1;
 	string d2;
 	string to;
-	string ti_save;
-	string ti_waste;
+	string tiSave;
+	string tiWaste;
 
 	// Creation of BioSystem
 	BioSystem * BioSys= new BioSystem();
@@ -971,7 +971,7 @@ CFG * BiocodeTest::Create_Compound_Conditional_With_Transfer_Droplets_Demo_CFG(b
 	tube = bioSave->new_container(STERILE_MICROFUGE_TUBE2ML);
 	dropVol = bioSave->vol(10, UL);
 	bioSave->first_step("Transfer In");
-	ti_save = bioSave->reuse_fluid(tube);
+	tiSave = bioSave->reuse_fluid(tube);
 	bioSave->next_step("Save this fluid");
 	bioSave->drain(tube, "save");
 	bioSave->end_protocol();
@@ -981,7 +981,7 @@ CFG * BiocodeTest::Create_Compound_Conditional_With_Transfer_Droplets_Demo_CFG(b
 	tube = bioWaste->new_container(STERILE_MICROFUGE_TUBE2ML);
 	dropVol = bioWaste->vol(10, UL);
 	bioWaste->first_step("Transfer In");
-	ti_waste = bioWaste->reuse_fluid(tube);
+	tiWaste = bioWaste->reuse_fluid(tube);
 	bioWaste->next_step("Discard this fluid");
 	bioWaste->drain(tube, "waste");
 	bioWaste->end_protocol();
@@ -999,16 +999,116 @@ CFG * BiocodeTest::Create_Compound_Conditional_With_Transfer_Droplets_Demo_CFG(b
 
 
 	BioCondition *bc = bcg->addNewCondition(compoundExp, bioSave);
-	bc->addTransferDroplet(to, ti_save);
+	bc->addTransferDroplet(to, tiSave);
 	bc = bcg->addNewCondition(NULL, bioWaste);
-	bc->addTransferDroplet(to, ti_waste);
+	bc->addTransferDroplet(to, tiWaste);
 
 	// Generate CFG from Biocoder and output CFG and all DAGs
 	CFG *cfg = BioSys->GetDmfbExecutableCFG();
 	cfg->setName("BC_Compound_Conditional_TransferDrops_CFG");
 	cfg->OutputGraphFile(cfg->getName(), true, true, true);
-    cout << "BioCoder Simple Conditional w/ Transfer Droplets CFG Generated" << endl;
-    return cfg;
+	cout << "BioCoder Compound Conditional w/ Transfer Droplets CFG Generated" << endl;
+	return cfg;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////
+// Creates a DAG that transfers a droplet to itself several times, based
+// on a runcount feature for a DAG (sub-assay). In a sense, the runcount
+// feature allows you to say: IF (runCount >= 10) THEN Branch
+///////////////////////////////////////////////////////////////////////////
+CFG * BiocodeTest::Create_Conditional_Runcount_With_Transfer_Droplets_Demo_CFG(bool outputBiocoderGraphs)
+{
+	double mult = 1; // TimeStep multiplier
+	double secPerTS = .5; //seconds per timestep
+
+	string d1;
+	string d2;
+	string toBio;
+	string toRpt;
+	string tiRpt;
+	string tiSave;
+
+	// Creation of BioSystem
+	BioSystem * BioSys= new BioSystem();
+	BioSys->setOutputGraphs(outputBiocoderGraphs);
+
+	// BioCoder Mix/Detect Protocol
+	BioCoder * bio = BioSys->addBioCoder();
+	Container tube = bio->new_container(STERILE_MICROFUGE_TUBE2ML);
+	Fluid reagent = bio->new_fluid("reagent",bio->vol(100,ML));
+	Fluid sample = bio->new_fluid("sample",bio->vol(100,ML));
+	Volume dropVol = bio->vol(10, UL);
+	Time time = bio->time(1, SECS);
+	bio->first_step("Dispense sample/reagent");
+	bio->measure_fluid(sample, dropVol, tube);
+	bio->measure_fluid(reagent, dropVol, tube);
+	bio->next_step("Mix");
+	bio->vortex(tube, time);
+	bio->next_step("Detect 1");
+	d1 = bio->measure_fluorescence(tube, time);
+	bio->next_step("Transfer Out");
+	toBio = bio->save_fluid(tube);
+	bio->end_protocol();
+
+	// BioCoder Repeat Protocol
+	BioCoder * bioRpt = BioSys->addBioCoder();
+	tube = bioRpt->new_container(STERILE_MICROFUGE_TUBE2ML);
+	Container tube2 = bioRpt->new_container(STERILE_MICROFUGE_TUBE2ML);
+	dropVol = bioRpt->vol(10, UL);
+	bioRpt->first_step("Transfer In");
+	tiRpt = bioRpt->reuse_fluid(tube);
+	bioRpt->next_step("Split");
+	bioRpt->measure_fluid(tube, 2, 1, tube2, false);
+	bioRpt->next_step("Dilute 1 Drop and Drain Other Drop");
+	bioRpt->drain(tube2, "save");
+	bioRpt->next_step("Mix");
+	bioRpt->measure_fluid(sample, dropVol, tube);
+	bioRpt->vortex(tube, time);
+	bioRpt->next_step("Detect 2");
+	d2 = bioRpt->measure_fluorescence(tube, time);
+	bioRpt->next_step("Transfer Out");
+	toRpt = bioRpt->save_fluid(tube);
+	bioRpt->end_protocol();
+
+	// BioCoder Save Protocol
+	BioCoder * bioSave = BioSys->addBioCoder();
+	tube = bioSave->new_container(STERILE_MICROFUGE_TUBE2ML);
+	dropVol = bioSave->vol(10, UL);
+	bioSave->first_step("Transfer In");
+	tiSave = bioSave->reuse_fluid(tube);
+	bioSave->next_step("Save this fluid");
+	bioSave->drain(tube, "save");
+	bioSave->end_protocol();
+
+	///////////////////////////////////////////////////////
+	// Conditional Groups
+	// bio --> bioRpt
+	BioConditionalGroup *bcgBio = BioSys->addBioCondGroup();
+	BioExpression *expBioIf = new BioExpression(d1, OP_GT, 0.9);
+	BioCondition *bcIf = bcgBio->addNewCondition(expBioIf, bioSave);
+	bcIf->addTransferDroplet(toBio, tiSave);
+	BioCondition *bcElse = bcgBio->addNewCondition(NULL, bioRpt);
+	bcElse->addTransferDroplet(toBio, tiRpt);
+
+	// bioRpt --> bioSave
+	BioConditionalGroup *bcgRpt = BioSys->addBioCondGroup();
+	BioExpression *expBioRptSense = new BioExpression(d2, OP_GT, 0.9);
+	BioCondition *bcRptIf = bcgRpt->addNewCondition(expBioRptSense, bioSave); // IF
+	bcRptIf->addTransferDroplet(toRpt, tiSave);
+	BioExpression *expBioRptRnCnt = new BioExpression(bioRpt, OP_LT, 4);
+	BioCondition *bcRptElseIf = bcgRpt->addNewCondition(expBioRptRnCnt, bioRpt); // ELSE-IF
+	bcRptElseIf->addTransferDroplet(toRpt, tiRpt);
+	BioCondition *bcRptElse = bcgRpt->addNewCondition(NULL, bioSave); // ELSE
+	bcRptElse->addTransferDroplet(toRpt, tiSave);
+
+	// Generate CFG from Biocoder and output CFG and all DAGs
+	CFG *cfg = BioSys->GetDmfbExecutableCFG();
+	cfg->setName("BC_Runcount_Conditional_TransferDrops_CFG");
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
+	cout << "BioCoder Runcount Conditional w/ Transfer Droplets CFG Generated" << endl;
+	return cfg;
 }
 
 ///////////////////////////////////////////////////////////////////////////

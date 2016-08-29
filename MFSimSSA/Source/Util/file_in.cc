@@ -194,10 +194,11 @@ CFG *FileIn::ReadCfgFromFile(string fileName)
 				}
 				else if (operandType == "RUN_COUNT")
 				{
-					claim(p.size() == 4, "Invalid number of parameters for EXP w/ RUN_COUNT.");
-					e->operandType = OP_SUB_EXP;
+					claim(p.size() == 5, "Invalid number of parameters for EXP w/ RUN_COUNT.");
+					e->operandType = OP_RUN_COUNT;
 					e->operationType = GetExOperationTypeFromString(p.at(2));
-					e->constant = strtod(p.at(3).c_str(), NULL); // run count
+					e->unconditionalParent = dags[p.at(3)]; // repeatableDagName
+					e->constant = strtod(p.at(4).c_str(), NULL); // runCount
 				}
 				else if (operandType == "ONE_SENSOR")
 				{
