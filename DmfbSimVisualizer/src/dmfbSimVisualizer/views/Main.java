@@ -70,7 +70,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.JButton;
 
-import com.sun.j3d.utils.applet.MainFrame;
+//import com.sun.j3d.utils.applet.MainFrame;
 import javax.swing.JTextField;
 import javax.swing.JProgressBar;
 import javax.swing.JCheckBox;
