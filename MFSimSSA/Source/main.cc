@@ -101,6 +101,8 @@ int main(int argc, char **argv)
 			//FileOut::WriteCfgToFile(cfg, "Test/", cfg->getName() + ".cfg");
 			//CFG *cfgIn = FileIn::ReadCfgFromFile("Test/" +  cfg->getName() + ".cfg");
 
+			// Dan Grissom - DemoFeatureDeleteMe Personal Change
+
 			CompiledCFG *compiledCFG = new CompiledCFG(synthesisEngine, cfg);
 			compiledCFG->execute();
 			compiledCFG->outputSimulationFiles();
