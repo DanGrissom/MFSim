@@ -108,6 +108,8 @@ int main(int argc, char **argv)
 			delete cfg;
 			//delete cfgIn;
 
+
+
 			cout << "-----------------------------------------------" << endl << "Exiting the UCR DMFB SSS Simulator" << endl;
 		}
 	}
