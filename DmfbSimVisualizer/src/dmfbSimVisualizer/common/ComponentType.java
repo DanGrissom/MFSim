@@ -1,3 +1,29 @@
+/*------------------------------------------------------------------------------*
+ *                       (c)2016, All Rights Reserved.     						*
+ *       ___           ___           ___     									*
+ *      /__/\         /  /\         /  /\    									*
+ *      \  \:\       /  /:/        /  /::\   									*
+ *       \  \:\     /  /:/        /  /:/\:\  									*
+ *   ___  \  \:\   /  /:/  ___   /  /:/~/:/        								*
+ *  /__/\  \__\:\ /__/:/  /  /\ /__/:/ /:/___     UCR DMFB Synthesis Framework  *
+ *  \  \:\ /  /:/ \  \:\ /  /:/ \  \:\/:::::/     www.microfluidics.cs.ucr.edu	*
+ *   \  \:\  /:/   \  \:\  /:/   \  \::/~~~~ 									*
+ *    \  \:\/:/     \  \:\/:/     \  \:\     									*
+ *     \  \::/       \  \::/       \  \:\    									*
+ *      \__\/         \__\/         \__\/    									*
+ *-----------------------------------------------------------------------------*/
+/*------------------------Class/Implementation Details--------------------------*
+ * Source: ComponentType.java													*
+ * Original Code Author(s): Jordan Ishii										*
+ * Original Completion/Release Date:											*
+ *																				*
+ * Details: Provides enumerations for each of the hardware component types .	*
+ *																				*
+ * Revision History:															*
+ * WHO		WHEN		WHAT													*
+ * ---		----		----													*
+ * FML		MM/DD/YY	One-line description									*
+ *-----------------------------------------------------------------------------*/
 package dmfbSimVisualizer.common;
 
 import dmfbSimVisualizer.parsers.HardwareParser;

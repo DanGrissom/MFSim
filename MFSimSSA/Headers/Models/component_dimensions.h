@@ -1,9 +1,23 @@
-/*
- * component_dimensions.h
- *
- *  Created on: Sep 5, 2016
- *      Author: jishii14
- */
+/*------------------------------------------------------------------------------*
+ *                       (c)2016, All Rights Reserved.     						*
+ *       ___           ___           ___     									*
+ *      /__/\         /  /\         /  /\    									*
+ *      \  \:\       /  /:/        /  /::\   									*
+ *       \  \:\     /  /:/        /  /:/\:\  									*
+ *   ___  \  \:\   /  /:/  ___   /  /:/~/:/        								*
+ *  /__/\  \__\:\ /__/:/  /  /\ /__/:/ /:/___     UCR DMFB Synthesis Framework  *
+ *  \  \:\ /  /:/ \  \:\ /  /:/ \  \:\/:::::/     www.microfluidics.cs.ucr.edu	*
+ *   \  \:\  /:/   \  \:\  /:/   \  \::/~~~~ 									*
+ *    \  \:\/:/     \  \:\/:/     \  \:\     									*
+ *     \  \::/       \  \::/       \  \:\    									*
+ *      \__\/         \__\/         \__\/    									*
+ *-----------------------------------------------------------------------------*/
+/*--------------------------------Class Details---------------------------------*
+ * Name: Component_Dimensions													*
+ *																				*
+ * Details: This class contains static variables for the dimensions of every    *
+ * hardware type.                                           					*
+ *-----------------------------------------------------------------------------*/
 
 #ifndef HEADERS_MODELS_COMPONENT_DIMENSIONS_H_
 #define HEADERS_MODELS_COMPONENT_DIMENSIONS_H_
