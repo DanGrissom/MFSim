@@ -31,9 +31,6 @@ class WireSegment : Entity
 		// General identifiers and status variables
 		static int next_id;
 
-
-		int pinNo;
-		int layer;
 		WireSegType segmentType;
 
 		// Start/stop relative locations
@@ -52,6 +49,12 @@ class WireSegment : Entity
 		WireSegment();
 		WireSegment(int pin, int lay, int beginX, int beginY, int endX, int endY);
 		virtual ~WireSegment();
+
+		int side;
+		bool willRouteToMC;
+		int numBeforeMC;
+		int pinNo;
+		int layer;
 
 		// Getters/Setters
 		int getId() { return id; }

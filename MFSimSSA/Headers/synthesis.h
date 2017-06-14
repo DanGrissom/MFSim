@@ -27,6 +27,13 @@
 #include "Models/dmfb_arch.h"
 #include "Resources/enums.h"
 #include "Models/dag.h"
+#include "Models/shift_register.h"
+#include "Models/unroutable_locations.h"
+#include "WireRouter/pcb_layout.h"
+#include <map>
+#include <stack>
+#include <string>
+#include <sstream>
 
 class Scheduler;
 class Placer;

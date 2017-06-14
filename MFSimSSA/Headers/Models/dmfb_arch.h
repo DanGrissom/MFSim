@@ -23,13 +23,21 @@
 
 #include "../PinMapper/pin_mapper.h"
 #include "../WireRouter/wire_router.h"
+#include "../WireRouter/wire_segment.h"
 #include "fixed_module.h"
+#include "shift_register.h"
+#include "microcontroller.h"
+#include "unroutable_locations.h"
+#include "pcb.h"
 #include "../Util/util.h"
 #include "io_port.h"
+#include "via.h"
+#include <map>
 //#include <vector>
 
 class PinMapper;
 class WireRouter;
+class PCB;
 
 class DmfbArch
 {
@@ -45,7 +53,28 @@ class DmfbArch
 		PinMapper *pinMapper;
 		WireRouter *wireRouter;
 
-
+		// Variables to help routing IC's in PCB
+		int wrOffsetX;
+		int wrOffsetY;
+		int numWRCellsHoriz;	// The number of wire routing cells contained vertically and horizontally on the PCB
+		int numWRCellsVert;
+		int totalManhatDistToWRDest;	// The total Manhattan distance from start of wires to ends (optimal wire routing)
+		int totalWireLengthGrid;
+		int srType;
+		int mcType;
+		int mcSide;
+		int maxLayer;
+		int xCoordToAimFor;
+		int yCoordToAimFor;
+		bool hasInitToAimFor;
+		double electrodePitchMicrons;
+		bool ***wireGrid;	// The grid that contains the status of PCB locations (whether a wire can be placed)
+		vector<ShiftRegister *> *shiftRegisters;
+		vector<WireSegment *> *areaRouteWires;
+		vector<PinDestLoc *> *nextStepPositions;	// Helper for wire routing
+		Microcontroller *microcontroller;
+		vector<Via *>  *vias;
+		PCB *pcb;
 
 	public:
 		// Constructors
@@ -75,5 +104,13 @@ class DmfbArch
 		friend class FileOut;
 		friend class FileIn;
 		friend class Test;
+		friend class Synthesis;
+		friend class PCBLayout;
+		friend class ShiftRegister;
+		friend class Microcontroller;
+		friend class PCB;
+		friend class Via;
+		friend class PCBLayoutTool;
+		friend class AreaRouter;
 };
 #endif /* DMFB_ARCH_H_ */

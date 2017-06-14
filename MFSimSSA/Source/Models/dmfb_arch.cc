@@ -36,6 +36,26 @@ DmfbArch::DmfbArch()
 	numCellsX = -1;
 	numCellsY = -1;
 	wireRouter = NULL;
+
+	// Instantiate PCB wire calculation variables
+	areaRouteWires = new vector<WireSegment *>();
+	vias = new vector<Via* >();
+	nextStepPositions = new vector<PinDestLoc *>();
+	mcSide = 1;
+	totalManhatDistToWRDest = 0;
+	totalWireLengthGrid = 0;
+	numCellsX = -1;
+	numCellsY = -1;
+	wireRouter = NULL;
+	shiftRegisters = NULL;
+	microcontroller = NULL;
+	pcb = NULL;
+	hasInitToAimFor = false;
+
+	// Set component variables for PCB Layout
+	electrodePitchMicrons = 1000;
+	srType = 2;
+	mcType = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

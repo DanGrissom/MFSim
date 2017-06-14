@@ -389,6 +389,18 @@ void Synthesis::synthesizeDesign()
 		arch->getWireRouter()->computeWireRoutes(pinActivations, false);
 		wrTime.endTimer();
 		wrTime.printElapsedTime();
+
+		bool includeAreaRoute = true;
+		if(includeAreaRoute)
+		{
+			ElapsedTimer arTime("Area-Routing Time");
+			arTime.startTimer();
+
+			PCBLayout::calculatePCBLayout(arch);
+
+			arTime.endTimer();
+			arTime.printElapsedTime();
+		}
 	}
 	else
 		cout << "Basic wire-routing bypassed according to synthesis flow." << endl;

@@ -28,6 +28,7 @@
 #include <string.h>
 #include <list>
 #include <map>
+#include "../WireRouter/wire_segment.h"
 #include "../Models/reconfig_module.h"
 #include "../Models/fixed_module.h"
 #include "../Models/expression.h"
@@ -40,6 +41,7 @@ struct WireRouteNode;
 class DmfbArch;
 class DAG;
 class Expression;
+struct SRPinNode;
 
 /////////////////////////////////////////////////////////////////
 // WireRouteNode Structure: Used to represent a wire routing node
@@ -427,6 +429,74 @@ struct Condition
 	DAG *branchIfTrue;
 	int order;
 	vector<TransferEdge *> transfers;
+};
+
+// Pins on Shift Register
+struct PinDestLoc {
+	PinDestLoc(int microSide, int idNo, int layerNum, int pinNumber, int xPosition, int yPosition, PinType pinType, bool isOuter)
+	{
+		micro = microSide;
+		id = idNo;
+		xPos = xPosition;
+		yPos = yPosition;
+		layer = layerNum;
+		type = pinType;
+		isAreaRouted = false;
+		isOuterSR = isOuter;
+		side = microSide;
+		pinNo = pinNumber;
+	}
+
+	PinDestLoc *copy()
+	{
+		PinDestLoc *copy = new PinDestLoc(micro, id, layer, pinNo, xPos, yPos, type, isOuterSR);
+
+		return copy;
+	}
+
+	int xPos;
+	int yPos;
+	int layer;
+	int micro;
+	PinType type;
+	bool isAreaRouted;
+	bool isOuterSR;
+	int side;
+	int id;
+	int pinNo;
+};
+
+// Linked List node for ease of chain (serial in out) routing
+struct SRPinNode {
+	SRPinNode *next = NULL;
+	PinDestLoc *location = NULL;
+
+	SRPinNode(PinDestLoc *loc)
+	{
+		location = loc;
+	}
+};
+
+// Array pin comparators
+struct PinIncreasingX {
+	bool operator()(WireSegment* pin1, WireSegment* pin2 ) const {
+		return pin1->getSourceWireCellX(0) < pin2->getSourceWireCellX(0);
+	}
+};
+struct PinDecreasingX {
+	bool operator()(WireSegment* pin1, WireSegment* pin2 ) const {
+		return pin1->getSourceWireCellX(0) > pin2->getSourceWireCellX(0);
+	}
+};
+struct PinIncreasingY {
+	bool operator()(WireSegment* pin1, WireSegment* pin2 ) const {
+		return pin1->getSourceWireCellY(0) < pin2->getSourceWireCellY(0);
+	}
+};
+struct PinDecreasingY {
+	bool operator()(WireSegment* pin1, WireSegment* pin2 ) const {
+		return pin1->getSourceWireCellY(0) > pin2->getSourceWireCellY(0);
+	}
 };
 
 #endif

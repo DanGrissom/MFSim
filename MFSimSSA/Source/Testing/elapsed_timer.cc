@@ -61,19 +61,19 @@ ElapsedTimer::~ElapsedTimer() {};
 void ElapsedTimer::startTimer()
 {
 #ifdef _WIN32
-	timeBeginPeriod(1); //Add Winmm.lib in Project
+	//timeBeginPeriod(1); //Add Winmm.lib in Project
 	QueryPerformanceFrequency(&timerFreq_);
 	QueryPerformanceCounter(&counterAtStart_);
 	//cout<<"timerFreq_ = "<<timerFreq_.QuadPart<<endl;
 	//cout<<"counterAtStart_ = "<<counterAtStart_.QuadPart<<endl;
 	TIMECAPS ptc;
 	UINT cbtc = 8;
-	MMRESULT result = timeGetDevCaps(&ptc, cbtc);
-	if (result != TIMERR_NOERROR)
-	{
-		cout << "result = TIMER ERROR - MUST BE USING WINDOWS FOR THIS FUNCTION." << endl;
-		exit(1);
-	}
+	//MMRESULT result = timeGetDevCaps(&ptc, cbtc);
+//	if (result != TIMERR_NOERROR)
+//	{
+//		cout << "result = TIMER ERROR - MUST BE USING WINDOWS FOR THIS FUNCTION." << endl;
+//		exit(1);
+//	}
 	/*else
 	 {
 	 cout<<"Minimum resolution = "<<ptc.wPeriodMin<<endl;

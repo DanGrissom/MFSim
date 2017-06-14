@@ -28,6 +28,7 @@
  *-----------------------------------------------------------------------------*/
 package dmfbSimVisualizer.common;
 
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -57,10 +58,15 @@ import javax.swing.ImageIcon;
 import dmfbSimVisualizer.common.WireSegment.SEGTYPE;
 import dmfbSimVisualizer.parsers.*;
 import dmfbSimVisualizer.views.Main;
+import javafx.geometry.HPos;
 
 
 public class DmfbDrawer
 {
+	public static int TEST_PIN_X;
+	public static int TEST_PIN_Y;
+	public static double changeInPitch = 1;
+	private static double conversionFactor;
 	private static String ext = "png";
 	private static String outDir = "Sim";
 	private static int numCellsX;
@@ -76,13 +82,64 @@ public class DmfbDrawer
 	private static int ioOffset;
 	private static int thinStroke;
 	private static int thickStroke;
+	private static int arrayOffsetX;
+	private static int arrayOffsetY;
 
+	//////////////////////////////////////////////////////////////////////////////////////
+	// Draws the given string centered at the XY coordinate
+	//////////////////////////////////////////////////////////////////////////////////////
+	public static void DrawRotatedCenteredString(String text, int x, int y, int width, int height, boolean rotate, Graphics2D g2d)
+	{
+		// Calculate the size of text
+		int size = 0;
+		if(height < width)
+			size = height - 1;
+		else
+			size = width - 1;
+
+		// Draw the text on its own buffered image so that it can be rotated
+		BufferedImage txtImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+		// Make a transparent image
+		Graphics2D imgGraphics = (Graphics2D) txtImg.getGraphics();
+		imgGraphics.setComposite(AlphaComposite.Clear);
+		imgGraphics.fillRect(0, 0, width, height);
+
+		// Add shift
+		x += arrayOffsetX;
+		y += arrayOffsetY;
+
+		imgGraphics.setComposite(AlphaComposite.Src);
+		imgGraphics.setFont(new Font("TimesRoman", Font.PLAIN, size)); 
+		FontMetrics metrics = imgGraphics.getFontMetrics(g2d.getFont());
+		int txtHeight = metrics.getHeight();
+		int txtWidth = metrics.stringWidth(text);
+
+		//		if(txtWidth > width || txtHeight > height)
+		//			imgGraphics.setFont(new Font("TimesRoman", Font.PLAIN, 7));
+
+		x -= width / 2 - 2;
+		y -= height / 2 + 2;
+
+		imgGraphics.setColor(Color.BLACK);
+		imgGraphics.drawString(text, 0, height);
+
+
+		if(rotate)
+			txtImg = RotateCW(txtImg);
+
+		g2d.drawImage(txtImg, null, x, y);
+	}
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Draws the given string centered at the XY coordinate
 	//////////////////////////////////////////////////////////////////////////////////////
 	public static void DrawCenteredString(String text, int x, int y, Graphics2D g2d)
 	{
+		// Add shift
+		x += arrayOffsetX;
+		y += arrayOffsetY;
+
 		String[] lines = text.split("\n");
 		FontMetrics metrics = g2d.getFontMetrics(g2d.getFont());
 		int hgt = metrics.getHeight() * lines.length;
@@ -103,7 +160,7 @@ public class DmfbDrawer
 			g2d.drawString(lines[i], x - adv/2, adjustedHeight - lineHgt/6);
 		}
 	}
-	
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Draws the given string and image at the centered at the XY coordinate. The font is
 	// already set, and thus, the image is resized to the proper font height and the
@@ -111,6 +168,10 @@ public class DmfbDrawer
 	//////////////////////////////////////////////////////////////////////////////////////
 	public static void DrawCenteredStringWithFollowingIcon(String text, int x, int y, BufferedImage image, Graphics2D g2d)
 	{
+		// Add shift
+		x += arrayOffsetX;
+		y += arrayOffsetY;
+
 		String[] lines = text.split("\n");
 		FontMetrics metrics = g2d.getFontMetrics(g2d.getFont());
 		int hgt = metrics.getHeight() * lines.length;
@@ -118,17 +179,17 @@ public class DmfbDrawer
 		image = DmfbDrawer.Resize(image, lineHgt, lineHgt);
 
 		int maxTextWidth = 0;		
-		
+
 		// Draw text
 		for (int i = 0; i < lines.length; i++)
 		{
 			int textWidth = metrics.stringWidth(lines[i]);
 			if (textWidth > maxTextWidth)
 				maxTextWidth = textWidth;
-			
+
 			int lineWidth = textWidth + image.getWidth();
 			int adjustedTxtHgt;
-			
+
 			if (lines.length == 1)
 				adjustedTxtHgt = y + hgt/2;
 			else if (lines.length % 2 == 0)
@@ -138,13 +199,13 @@ public class DmfbDrawer
 
 			g2d.drawString(lines[i], x - lineWidth/2, adjustedTxtHgt - lineHgt/6);
 		}
-		
+
 		// Now draw image
 		int maxLineWidth = maxTextWidth + image.getWidth();
 		int adjustedImgHgt = y - image.getHeight()/2;
 		g2d.drawImage(image, null, x - maxLineWidth/2 + maxTextWidth, adjustedImgHgt);
 	}
-	
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Draws the given string and image at the centered at the XY coordinate. The font is
 	// already set, and thus, the image is resized to the proper font height and the
@@ -152,6 +213,10 @@ public class DmfbDrawer
 	//////////////////////////////////////////////////////////////////////////////////////
 	public static void DrawCenteredStringWithIconBelow(String text, int x, int y, BufferedImage image, Graphics2D g2d)
 	{
+		// Add shift
+		x += arrayOffsetX;
+		y += arrayOffsetY;
+
 		text = text + "\n ";
 		String[] lines = text.split("\n");
 		FontMetrics metrics = g2d.getFontMetrics(g2d.getFont());
@@ -160,17 +225,17 @@ public class DmfbDrawer
 		image = DmfbDrawer.Resize(image, lineHgt, lineHgt);
 
 		int maxTextWidth = 0;		
-		
+
 		// Draw text
 		for (int i = 0; i < lines.length; i++)
 		{
 			int textWidth = metrics.stringWidth(lines[i]);
 			if (textWidth > maxTextWidth)
 				maxTextWidth = textWidth;
-			
+
 			//int lineWidth = textWidth;
 			int adjustedTxtHgt;
-			
+
 			if (lines.length == 1)
 				adjustedTxtHgt = y + hgt/2;
 			else if (lines.length % 2 == 0)
@@ -184,7 +249,7 @@ public class DmfbDrawer
 				g2d.drawImage(image, null, x-image.getWidth()/2, adjustedTxtHgt-image.getHeight());
 		}
 	}
-	
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Rotates the input image 90 degrees clock-wise
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -222,7 +287,7 @@ public class DmfbDrawer
 	{
 		BufferedImage input = new BufferedImage(cellDim*3, (int)((double)cellDim*1.5), BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2dIn = (Graphics2D) input.getGraphics();
-		g2dIn.setColor(Color.WHITE);
+		g2dIn.setColor(new Color(0,100,0));
 
 		// Draw Pads
 		g2dIn.setStroke(new BasicStroke(thinStroke));//1
@@ -262,26 +327,45 @@ public class DmfbDrawer
 	{
 		// Set dimension values
 		numCellsX = da.numXcells;
-		numCellsY = da.numYcells;			
+		numCellsY = da.numYcells;
 		cellDim = Math.min(maxWidth / (numCellsX + 6), maxHeight / (numCellsY + 6)); //60;
 		ioLong = cellDim * 3;
 		ioShort = (int)((double)cellDim * 1.5);
 		offset = ioLong;
 		arrayWidth =  cellDim * numCellsX;
 		arrayHeight = cellDim * numCellsY;
-		locWidth = arrayWidth + ioLong*2;
+
+		//double changeRatio = locWidth;	// The ratio of the change in size
+
+		locWidth = arrayWidth + ioLong*2; // No longer used, but still used for calculations
+
+		//changeRatio = locWidth / changeRatio;
+
 		locHeight = arrayHeight + ioLong*2;
 		ioOffset = (ioShort - cellDim)/2;
 		thinStroke = Math.max(cellDim / 20, 1);
 		thickStroke = Math.max(cellDim / 10, thinStroke*2);
+
+		// Update Shift Register and Microcontroller dimensions by storing the change in electrode pitch
+		changeInPitch = cellDim / 17.0;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Draws a blank DMFB (contains electrodes, ioPorts, any heaters/detecters/etc...but
-	// no droplets, reconfigurable modules or anything else specific to a certain time
+	// no droplets, reconfigurable modules or anything else specific to a certain time.
+	// Also draws PCB and other components outside of Dmfb (Shift Registers, Microcontrollers...
+	// as these must all be introduced between the introduction of graphics images and
+	// the drawing of the DMFB
 	//////////////////////////////////////////////////////////////////////////////////////
-	public static BufferedImage DrawBlankDmfb(DmfbArch da, DrawOptions drawOptions, Map<Integer, ArrayList<String>> coordsAtPin, Map<Integer, ArrayList<WireSegment>> wireSegsToPin) throws IOException
+	public static BufferedImage DrawBlankDmfb(DmfbArch da, DrawOptions drawOptions, Map<Integer, ArrayList<String>> coordsAtPin, Map<Integer, ArrayList<WireSegment>> wireSegsToPin, ArrayList<WireSegment> wireSegsToIC) throws IOException
 	{
+		// Set units to an amount that suits the components
+		boolean beMoreSpecific = true;
+		if(beMoreSpecific)
+			SetDmfbUnitDims(da, 750, 750);
+		
+		//SetDmfbUnitDims(da, 300, 300);
+
 		// Open Auxiliary Image Files	
 		Image heatImg = (new ImageIcon(Main.class.getResource("/dmfbSimVisualizer/resources/heat_64.png"))).getImage();
 		BufferedImage heat = new BufferedImage(heatImg.getWidth(null), heatImg.getHeight(null), BufferedImage.TYPE_INT_ARGB);
@@ -305,7 +389,7 @@ public class DmfbDrawer
 		BufferedImage outputTop = RotateCW(outputLeft);
 		BufferedImage outputRight = RotateCW(outputTop);
 		BufferedImage outputBottom = RotateCW(outputRight);
-		
+
 		BufferedImage inputLeftWash = DrawIoPort(cellDim, new Color(149,179,215), new Color(220,230,242), true);
 		BufferedImage inputTopWash = RotateCW(inputLeftWash);
 		BufferedImage inputRightWash = RotateCW(inputTopWash);
@@ -314,13 +398,122 @@ public class DmfbDrawer
 		BufferedImage outputTopWash = RotateCW(outputLeftWash);
 		BufferedImage outputRightWash = RotateCW(outputTopWash);
 		BufferedImage outputBottomWash = RotateCW(outputRightWash);
-		
+
+		// Access Component values
+		ArrayList<Integer> pcbData = HardwareParser.getPCBData(changeInPitch);
+		ArrayList<ComponentCoordinate> srCoords = HardwareParser.getSRCoords();
+		ArrayList<ComponentCoordinate> mcCoords = HardwareParser.getMCCoords();
+		ArrayList<ComponentCoordinate> viaCoords = HardwareParser.getViaCoords();
+
+		// Set the pixel count
+		// THIS NEEDS TO BE CHANGED DEPENDING ON WHAT IS DONE
+		//SetDmfbUnitDims(da, 750, 750);
+
+		// Adjust all component information
+		for(int i = 0; i < pcbData.size(); i ++)
+		{
+			pcbData.set(i, (int) (pcbData.get(i) * changeInPitch));
+		}
+
+		// Calculate conversion factor (px/mm)
+		conversionFactor = (17.0 * changeInPitch) / (HardwareParser.getElectronMicrons() / 1000.0);
+
+		// Find next layer above to allow for proper via coloring
+		int nextLayer = -1;
+		if(drawOptions.currentLayer != 0)
+		{
+			nextLayer = drawOptions.currentLayer - 1;
+		}
+		else
+		{
+			nextLayer = drawOptions.currentLayer + 1;
+		}
+
+		// Calculate the sizes of each PCB section (DMFB, Shift Register, Microcontroller)
+		int pcbStartingX = pcbData.get(5);
+		int pcbStartingY = pcbData.get(6);
+		int dmfbSectionWidth = pcbData.get(1);
+		int srSectionWidth = pcbData.get(2);
+		int mcSectionWidth = pcbData.get(3);
+		int pcbHeight = pcbData.get(4);
+
+		// NOTE: Although offset is factored out while calculating positioning
+		// for the array, it is necessary as it is used to calculate array size
+		ComponentCoordinate arrayCoord = HardwareParser.getArrayCoord();
+		arrayOffsetX = (int) (-1 * offset + arrayCoord.getX() * changeInPitch);
+		arrayOffsetY = (int) (-1 * (offset) + arrayCoord.getY() * changeInPitch);
 
 		// Create tiled LoC
-		BufferedImage imgDmfb = new BufferedImage(locWidth, locHeight, BufferedImage.TYPE_INT_RGB);	
+		BufferedImage imgDmfb = new BufferedImage(dmfbSectionWidth + srSectionWidth + mcSectionWidth, pcbHeight, BufferedImage.TYPE_INT_RGB);	
 		Graphics2D g2d = (Graphics2D) imgDmfb.getGraphics();
+		g2d.fillRect(pcbStartingX,  pcbStartingY, dmfbSectionWidth + srSectionWidth + mcSectionWidth, pcbHeight);	// TODO: This is where to change image dimensions
+
+		g2d.setColor(new Color(0,100,0));
+
+		// Draw PCB
+		g2d.fillRect(pcbStartingX,  pcbStartingY, dmfbSectionWidth + srSectionWidth + mcSectionWidth, pcbHeight);
+
+		// Draw background for array
 		g2d.setColor(Color.WHITE);
-		g2d.fillRect(0,  0, locWidth, locHeight);
+		g2d.fillRect(offset + arrayOffsetX, offset + arrayOffsetY, arrayWidth, arrayHeight);
+
+		if(drawOptions.currentLayer == 0)
+		{	
+			// Draw Microcontroller
+			for(ComponentCoordinate coord: mcCoords)
+			{
+				//ComponentCoordinate testCoord = new ComponentCoordinate(coord.getType(), new Integer(pcbWidth + 800).toString(), new Integer((int) ((HardwareConstants.PCB_BUFFER_DMFB) * conversionFactor - 175)).toString());
+
+				Microcontroller mc = new Microcontroller(coord, HardwareParser.getElectronMicrons() / 1000.0, beMoreSpecific);
+				mc.Draw(g2d);
+			}
+
+			// Draw Shift Registers
+			int test = 0;
+			for(ComponentCoordinate coord: srCoords)
+			{
+				ShiftRegister sr = new ShiftRegister(coord, HardwareParser.getElectronMicrons() / 1000.0);
+				sr.Draw(g2d);
+
+				if(test == 4)
+				{
+					TEST_PIN_X = sr.testGetPinX();
+					TEST_PIN_Y = sr.testGetPinY();
+				}
+
+				test++;
+			}
+		}
+
+		// Draw Vias
+		for(ComponentCoordinate coord: viaCoords)
+		{
+			if(coord.getBeginLayer() >= drawOptions.currentLayer || coord.getEndLayer() == drawOptions.currentLayer)
+			{
+				int wrOffset = ioLong - cellDim / 2;	    	    			
+				int numXGridPerPin = (da.numXwireCells-1) / (da.numXcells+1); // # X-Grid quantiles between pins
+				int numYGridPerPin = (da.numYwireCells-1) / (da.numYcells+1); // # X-Grid quantiles between pins
+				float trackDimX = ((float)cellDim / (float)(numXGridPerPin));
+				float trackDimY = ((float)cellDim / (float)(numYGridPerPin));
+				int viaContactDim = (int) (HardwareConstants.VIA_CONTACT_WIDTH * conversionFactor);
+				int viaDim = (int) (HardwareConstants.VIA_WIDTH * conversionFactor);
+
+				// Convert to pixels
+				int viaX = (coord.getX() / numXGridPerPin) * cellDim + (int)((coord.getX() % numXGridPerPin) * trackDimX);
+				int viaY = (coord.getY() / numYGridPerPin) * cellDim + (int)((coord.getY() % numYGridPerPin) * trackDimY);
+				int innerCircleX = viaX + (viaContactDim - viaDim) / 2;
+				int innerCircleY = viaY + (viaContactDim - viaDim) / 2;
+
+				g2d.setColor(HardwareConstants.COLORS[coord.getBeginLayer()]);
+				g2d.fillOval(viaX - viaContactDim / 2, viaY - viaContactDim / 2, viaContactDim, viaContactDim);
+				g2d.setColor(HardwareConstants.COLORS[coord.getEndLayer()]);			
+				g2d.fillOval(innerCircleX - viaContactDim / 2, innerCircleY - viaContactDim / 2, viaDim, viaDim);
+
+				g2d.setColor(Color.BLACK);
+				g2d.drawOval(viaX - viaContactDim / 2, viaY - viaContactDim / 2, viaContactDim, viaContactDim);
+				g2d.drawOval(innerCircleX - viaContactDim / 2, innerCircleY - viaContactDim / 2, viaDim, viaDim);
+			}
+		}
 
 		// Shade the electrodes that have no pin (are not connected)								
 		if (coordsAtPin != null)
@@ -337,7 +530,7 @@ public class DmfbDrawer
 					String coord = coords.get(i).substring(coords.get(i).indexOf("("), coords.get(i).indexOf(")")+1);
 					int x = Integer.parseInt(coord.substring(coord.indexOf("("), coord.indexOf(",")).replaceAll("[^\\d]", ""));
 					int y = Integer.parseInt(coord.substring(coord.indexOf(","), coord.indexOf(")")).replaceAll("[^\\d]", ""));
-					g2d.fillRect(ioLong + x * cellDim, ioLong + y * cellDim, cellDim, cellDim);
+					g2d.fillRect(ioLong + x * cellDim + arrayOffsetX, ioLong + y * cellDim + arrayOffsetY, cellDim, cellDim);
 				}
 			}
 			g2d.setColor(lastColor);
@@ -347,9 +540,9 @@ public class DmfbDrawer
 		g2d.setColor(Color.BLACK);
 		g2d.setStroke(new BasicStroke(thinStroke));//1
 		for (int x = 0; x < numCellsX; x++)
-			g2d.drawLine(offset + x*cellDim, offset, offset + x*cellDim, offset + arrayHeight);
+			g2d.drawLine(offset + x*cellDim + arrayOffsetX, offset + arrayOffsetY, offset + x*cellDim + arrayOffsetX, offset + arrayHeight + arrayOffsetY);
 		for (int y = 0; y < numCellsY; y++)
-			g2d.drawLine(offset, offset + y*cellDim, offset + arrayWidth, offset + y*cellDim);
+			g2d.drawLine(offset + arrayOffsetX, offset + y*cellDim + arrayOffsetY, offset + arrayWidth + arrayOffsetX, offset + y*cellDim + arrayOffsetY);
 		//g2d.setStroke(new BasicStroke(1));
 
 		Stroke oldStroke;
@@ -365,7 +558,7 @@ public class DmfbDrawer
 				g2d.setColor(Color.BLACK);
 				oldStroke = g2d.getStroke();
 				g2d.setStroke(new BasicStroke(thickStroke));//2
-				g2d.drawRect(fa.tl_x * cellDim + offset, fa.tl_y * cellDim + offset, (fa.br_x-fa.tl_x+1)*cellDim, (fa.br_y-fa.tl_y+1)*cellDim);
+				g2d.drawRect(fa.tl_x * cellDim + offset + arrayOffsetX, fa.tl_y * cellDim + offset + arrayOffsetY, (fa.br_x-fa.tl_x+1)*cellDim, (fa.br_y-fa.tl_y+1)*cellDim);
 				g2d.setStroke(oldStroke);
 			}
 		}
@@ -381,7 +574,7 @@ public class DmfbDrawer
 				{
 					for (int y = fa.tl_y; y <= fa.br_y; y++)
 					{
-						g2d.drawImage(detect, null, (x * cellDim) + offset, (y * cellDim) + offset);
+						g2d.drawImage(detect, null, (x * cellDim) + offset + arrayOffsetX, (y * cellDim) + offset + arrayOffsetY);
 						//g2d.setColor(Color.BLACK);
 						//g2d.drawString(fa.name, x * cellDim + cellDim/5, y * cellDim + cellDim/2);	    				
 					}
@@ -394,7 +587,7 @@ public class DmfbDrawer
 				{
 					for (int y = fa.tl_y; y <= fa.br_y; y++)
 					{
-						g2d.drawImage(heat, null, (x * cellDim) + offset, (y * cellDim) + offset);
+						g2d.drawImage(heat, null, (x * cellDim) + offset + arrayOffsetX, (y * cellDim) + offset + arrayOffsetY);
 						//g2d.setColor(Color.BLACK);
 						//g2d.drawString(fa.name, x * cellDim + cellDim/3, y * cellDim + 2*cellDim/3);
 					}
@@ -417,12 +610,12 @@ public class DmfbDrawer
 				{
 					if (ioPort.containsWashFluid)
 					{
-						g2d.drawImage(inputTopWash, null, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1, 0);
+						g2d.drawImage(inputTopWash, null, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1 + arrayOffsetX, 0 + arrayOffsetY);
 						DrawCenteredStringWithIconBelow(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), (ioPort.pos_xy * cellDim) + offset + cellDim/2, (ioLong-cellDim)/2, clean, g2d);
 					}
 					else
 					{
-						g2d.drawImage(inputTop, null, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1, 0);
+						g2d.drawImage(inputTop, null, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1 + arrayOffsetX, 0 + arrayOffsetY);
 						DrawCenteredString(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), (ioPort.pos_xy * cellDim) + offset + cellDim/2, (ioLong-cellDim)/2, g2d);
 					}
 				}
@@ -430,12 +623,12 @@ public class DmfbDrawer
 				{
 					if (ioPort.containsWashFluid)
 					{
-						g2d.drawImage(inputBottomWash, null, (ioPort.pos_xy * cellDim) + offset - ioOffset, offset + arrayHeight);
+						g2d.drawImage(inputBottomWash, null, (ioPort.pos_xy * cellDim) + offset - ioOffset + arrayOffsetX, offset + arrayHeight + arrayOffsetY);
 						DrawCenteredStringWithIconBelow(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), (ioPort.pos_xy * cellDim) + offset + cellDim/2, locHeight - (ioLong-cellDim) / 2, clean, g2d);
 					}
 					else
 					{
-						g2d.drawImage(inputBottom, null, (ioPort.pos_xy * cellDim) + offset - ioOffset, offset + arrayHeight);					
+						g2d.drawImage(inputBottom, null, (ioPort.pos_xy * cellDim) + offset - ioOffset + arrayOffsetX, offset + arrayHeight + arrayOffsetY);					
 						DrawCenteredString(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), (ioPort.pos_xy * cellDim) + offset + cellDim/2, locHeight - (ioLong-cellDim) / 2, g2d);
 					}
 				}
@@ -443,12 +636,12 @@ public class DmfbDrawer
 				{
 					if (ioPort.containsWashFluid)
 					{
-						g2d.drawImage(inputLeftWash, null, 0, (ioPort.pos_xy * cellDim) + offset - ioOffset);
+						g2d.drawImage(inputLeftWash, null, 0 + arrayOffsetX, (ioPort.pos_xy * cellDim) + offset - ioOffset + arrayOffsetY);
 						DrawCenteredStringWithFollowingIcon(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), (ioLong-cellDim)/2, (ioPort.pos_xy * cellDim) + offset + cellDim/2, clean, g2d);
 					}
 					else
 					{
-						g2d.drawImage(inputLeft, null, 0, (ioPort.pos_xy * cellDim) + offset - ioOffset);
+						g2d.drawImage(inputLeft, null, 0 + arrayOffsetX, (ioPort.pos_xy * cellDim) + offset - ioOffset + arrayOffsetY);
 						DrawCenteredString(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), (ioLong-cellDim)/2, (ioPort.pos_xy * cellDim) + offset + cellDim/2, g2d);
 					}
 				}
@@ -456,12 +649,12 @@ public class DmfbDrawer
 				{
 					if (ioPort.containsWashFluid)
 					{
-						g2d.drawImage(inputRightWash, null, offset + arrayWidth, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1);
+						g2d.drawImage(inputRightWash, null, offset + arrayWidth + arrayOffsetX, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1 + arrayOffsetY);
 						DrawCenteredStringWithFollowingIcon(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), locWidth - (ioLong-cellDim) / 2, (ioPort.pos_xy * cellDim) + offset + cellDim/2, clean, g2d);
 					}
 					else
 					{
-						g2d.drawImage(inputRight, null, offset + arrayWidth, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1);
+						g2d.drawImage(inputRight, null, offset + arrayWidth + arrayOffsetX, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1 + arrayOffsetY);
 						DrawCenteredString(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), locWidth - (ioLong-cellDim) / 2, (ioPort.pos_xy * cellDim) + offset + cellDim/2, g2d);
 					}
 				} 	
@@ -472,12 +665,12 @@ public class DmfbDrawer
 				{
 					if (ioPort.containsWashFluid)
 					{
-						g2d.drawImage(outputTopWash, null, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1, 0);
+						g2d.drawImage(outputTopWash, null, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1 + arrayOffsetX, 0 + arrayOffsetY);
 						DrawCenteredStringWithIconBelow(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), (ioPort.pos_xy * cellDim) + offset + cellDim/2, (ioLong-cellDim)/2, clean, g2d);
 					}
 					else
 					{
-						g2d.drawImage(outputTop, null, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1, 0);
+						g2d.drawImage(outputTop, null, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1 + arrayOffsetX, 0 + arrayOffsetY);
 						DrawCenteredString(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), (ioPort.pos_xy * cellDim) + offset + cellDim/2, (ioLong-cellDim)/2, g2d);
 					}
 				}
@@ -485,12 +678,12 @@ public class DmfbDrawer
 				{
 					if (ioPort.containsWashFluid)
 					{
-						g2d.drawImage(outputBottomWash, null, (ioPort.pos_xy * cellDim) + offset - ioOffset, offset + arrayHeight);
+						g2d.drawImage(outputBottomWash, null, (ioPort.pos_xy * cellDim) + offset - ioOffset + arrayOffsetX, offset + arrayHeight + arrayOffsetY);
 						DrawCenteredStringWithIconBelow(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), (ioPort.pos_xy * cellDim) + offset + cellDim/2, locHeight - (ioLong-cellDim) / 2, clean, g2d);
 					}
 					else
 					{
-						g2d.drawImage(outputBottom, null, (ioPort.pos_xy * cellDim) + offset - ioOffset, offset + arrayHeight);
+						g2d.drawImage(outputBottom, null, (ioPort.pos_xy * cellDim) + offset - ioOffset + arrayOffsetX, offset + arrayHeight + arrayOffsetY);
 						DrawCenteredString(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), (ioPort.pos_xy * cellDim) + offset + cellDim/2, locHeight - (ioLong-cellDim) / 2, g2d);
 					}
 				}
@@ -498,12 +691,12 @@ public class DmfbDrawer
 				{
 					if (ioPort.containsWashFluid)
 					{
-						g2d.drawImage(outputLeftWash, null, 0, (ioPort.pos_xy * cellDim) + offset - ioOffset);
+						g2d.drawImage(outputLeftWash, null, 0 + arrayOffsetX, (ioPort.pos_xy * cellDim) + offset - ioOffset + arrayOffsetY);
 						DrawCenteredStringWithFollowingIcon(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), (ioLong-cellDim)/2, (ioPort.pos_xy * cellDim) + offset + cellDim/2, clean, g2d);
 					}
 					else
 					{
-						g2d.drawImage(outputLeft, null, 0, (ioPort.pos_xy * cellDim) + offset - ioOffset);
+						g2d.drawImage(outputLeft, null, 0 + arrayOffsetX, (ioPort.pos_xy * cellDim) + offset - ioOffset + arrayOffsetY);
 						DrawCenteredString(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), (ioLong-cellDim)/2, (ioPort.pos_xy * cellDim) + offset + cellDim/2, g2d);
 					}
 				}
@@ -511,12 +704,12 @@ public class DmfbDrawer
 				{
 					if (ioPort.containsWashFluid)
 					{
-						g2d.drawImage(outputRightWash, null, offset + arrayWidth, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1);
+						g2d.drawImage(outputRightWash, null, offset + arrayWidth + arrayOffsetX, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1 + arrayOffsetY);
 						DrawCenteredStringWithFollowingIcon(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), locWidth - (ioLong-cellDim) / 2, (ioPort.pos_xy * cellDim) + offset + cellDim/2, clean, g2d);
 					}
 					else
 					{
-						g2d.drawImage(outputRight, null, offset + arrayWidth, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1);
+						g2d.drawImage(outputRight, null, offset + arrayWidth + arrayOffsetX, (ioPort.pos_xy * cellDim) + offset - ioOffset + 1 + arrayOffsetY);
 						DrawCenteredString(ioPort.portName.substring(0, Math.min(ioPort.portName.length(), 3)), locWidth - (ioLong-cellDim) / 2, (ioPort.pos_xy * cellDim) + offset + cellDim/2, g2d);
 					}
 				}
@@ -527,12 +720,12 @@ public class DmfbDrawer
 		g2d.setColor(Color.BLACK);
 		oldStroke = g2d.getStroke();
 		g2d.setStroke(new BasicStroke(thickStroke));//2
-		g2d.drawRect(offset, offset, arrayWidth, arrayHeight);
+		g2d.drawRect(offset + arrayOffsetX, offset + arrayOffsetY, arrayWidth, arrayHeight);
 		g2d.setStroke(oldStroke);	
 
 		int fontSize;
 		Font font;
-		
+
 		// Draw the coordinates on the left/top side
 		if (drawOptions.drawXYGridLabels)
 		{
@@ -541,9 +734,9 @@ public class DmfbDrawer
 			g2d.setFont(font);
 			g2d.setColor(Color.BLACK);
 			for (int i = 0; i < numCellsX; i++)
-				g2d.drawString(String.valueOf(i), ioLong + i*cellDim + cellDim/10, ioLong + fontSize);
+				g2d.drawString(String.valueOf(i), ioLong + i*cellDim + cellDim/10 + arrayOffsetX, ioLong + fontSize + arrayOffsetY);
 			for (int i = 1; i < numCellsY; i++)
-				g2d.drawString(String.valueOf(i), ioLong + cellDim/10, ioLong + i*cellDim + fontSize);
+				g2d.drawString(String.valueOf(i), ioLong + cellDim/10 + arrayOffsetX, ioLong + i*cellDim + fontSize + arrayOffsetY);
 		}
 
 
@@ -589,7 +782,7 @@ public class DmfbDrawer
 			int numYGridPerPin = (da.numYwireCells-1) / (da.numYcells+1); // # X-Grid quantiles between pins
 			float trackDimX = ((float)cellDim / (float)(numXGridPerPin));
 			float trackDimY = ((float)cellDim / (float)(numYGridPerPin));
-			
+
 			for (Integer pinNo : wireSegsToPin.keySet())
 			{				
 				ArrayList<WireSegment> wire = wireSegsToPin.get(pinNo);
@@ -607,7 +800,7 @@ public class DmfbDrawer
 						int y1 = wrOffset + (ws.sourceGridCellY / numYGridPerPin) * cellDim + (int)((ws.sourceGridCellY % numYGridPerPin) * trackDimY);
 						int x2 = wrOffset + (ws.destGridCellX / numXGridPerPin) * cellDim + (int)((ws.destGridCellX % numXGridPerPin) * trackDimX);
 						int y2 = wrOffset + (ws.destGridCellY / numYGridPerPin) * cellDim + (int)((ws.destGridCellY % numYGridPerPin) * trackDimY);
-						g2d.drawLine(x1, y1, x2, y2);
+						g2d.drawLine(x1 + arrayOffsetX, y1 + arrayOffsetY, x2 + arrayOffsetX, y2 + arrayOffsetY);
 					}
 					else
 						MFError.DisplayError("Unknown wire-segment type.");
@@ -720,18 +913,18 @@ public class DmfbDrawer
 				Color raColor = Color.LIGHT_GRAY;
 				if (ra.opType.equals(OperationType.MIX))
 					raColor = new Color(0.554f, 0.703f, 0.886f, 0.5f); // Blue
-					else if (ra.opType.equals(OperationType.DILUTE))
-						raColor = new Color(0.781f, 0.746f, 0.902f, 0.5f); // Purple
-					else if (ra.opType.equals(OperationType.SPLIT))
-						raColor = new Color(0.714f, 0.867f, 0.906f, 0.5f); // Light Blue
-					else if (ra.opType.equals(OperationType.HEAT))
-						raColor = new Color(0.964f, 0.585f, 0.273f, 0.5f); // Orange
-					else if (ra.opType.equals(OperationType.COOL))
-						raColor = new Color(0.964f, 0.585f, 0.273f, 0.5f); // Orange
-					else if (ra.opType.equals(OperationType.DETECT))
-						raColor = new Color(0.765f, 0.738f, 0.589f, 0.5f); // Tan
-					else if (ra.opType.equals(OperationType.STORAGE))
-						raColor = new Color(1.0f, 1.0f, 0.717f, 0.5f); // Light Yellow
+				else if (ra.opType.equals(OperationType.DILUTE))
+					raColor = new Color(0.781f, 0.746f, 0.902f, 0.5f); // Purple
+				else if (ra.opType.equals(OperationType.SPLIT))
+					raColor = new Color(0.714f, 0.867f, 0.906f, 0.5f); // Light Blue
+				else if (ra.opType.equals(OperationType.HEAT))
+					raColor = new Color(0.964f, 0.585f, 0.273f, 0.5f); // Orange
+				else if (ra.opType.equals(OperationType.COOL))
+					raColor = new Color(0.964f, 0.585f, 0.273f, 0.5f); // Orange
+				else if (ra.opType.equals(OperationType.DETECT))
+					raColor = new Color(0.765f, 0.738f, 0.589f, 0.5f); // Tan
+				else if (ra.opType.equals(OperationType.STORAGE))
+					raColor = new Color(1.0f, 1.0f, 0.717f, 0.5f); // Light Yellow
 
 				// DRAW Interference Regions and Reconfigurable Areas
 				Color irColor = new Color(0.75f, 0.312f, 0.300f, 0.5f); // Red
@@ -748,10 +941,10 @@ public class DmfbDrawer
 							g2d2.fillRect(ioLong + x * cellDim, ioLong + y * cellDim, cellDim, cellDim);
 
 							if (drawOptions.drawModuleNames)
-    						{
-	    	    	       		g2d2.setColor(Color.BLACK);
-	    	    	    		DrawCenteredString(ra.name, ioLong + x*cellDim + cellDim/2, ioLong + y*cellDim + cellDim/2, g2d2);
-    						}
+							{
+								g2d2.setColor(Color.BLACK);
+								DrawCenteredString(ra.name, ioLong + x*cellDim + cellDim/2, ioLong + y*cellDim + cellDim/2, g2d2);
+							}
 						}
 						else if (drawOptions.drawModIr)
 						{
@@ -796,7 +989,7 @@ public class DmfbDrawer
 		da.numXcells = p.getNumXcells();
 		da.numYcells = p.getNumYcells();
 		da.IoPorts = p.getIoPorts();
-		
+
 		// Set the unit dimensions
 		SetDmfbUnitDims(da, drawOptions.maxWidth, drawOptions.maxHeight);
 
@@ -920,7 +1113,7 @@ public class DmfbDrawer
 				if (drawAllCycles || routing)
 				{
 					// Create new base LoC image to draw droplets on
-					BufferedImage cycleLoc = DrawBlankDmfb(da, drawOptions, coordsAtPin, null);
+					BufferedImage cycleLoc = DrawBlankDmfb(da, drawOptions, coordsAtPin, null, null);
 					Graphics2D g2d2 = (Graphics2D) cycleLoc.getGraphics();
 
 					// Draw the time-step
@@ -1018,7 +1211,7 @@ public class DmfbDrawer
 							g2d2.fillRect(ioLong + x * cellDim, ioLong + y * cellDim, cellDim, cellDim);
 						}
 					}
-					
+
 					// Draw cell statuses (draw droplets)
 					if (drawOptions.drawDroplets)
 					{
@@ -1155,7 +1348,7 @@ public class DmfbDrawer
 					beg = String.valueOf(beginningTS-1);
 
 				// Create new base LoC image to draw routes on
-				BufferedImage tsLoc = DrawBlankDmfb(da, drawOptions, null, null);
+				BufferedImage tsLoc = DrawBlankDmfb(da, drawOptions, null, null ,null);
 				Graphics2D g2d2 = (Graphics2D) tsLoc.getGraphics();		    	
 
 				// Draw the time-step
@@ -1322,7 +1515,7 @@ public class DmfbDrawer
 				if (ra.br_y+1 > maxY)
 					maxY = ra.br_y+1;
 			}
-			
+
 			// Compute max time-step
 			int mTS = (int)(reconfigAreas.get(reconfigAreas.size()-1).stop_TS);		
 			int totalCells = mTS * numCellsX*numCellsY;
@@ -1370,7 +1563,7 @@ public class DmfbDrawer
 			int beginningTS = i;
 
 			// Create new base LoC image to draw modules on
-			BufferedImage tsLoc = DrawBlankDmfb(da, drawOptions, null, null);
+			BufferedImage tsLoc = DrawBlankDmfb(da, drawOptions, null, null, null);
 			Graphics2D g2d2 = (Graphics2D) tsLoc.getGraphics();
 
 			// Draw time-step label
@@ -1515,51 +1708,120 @@ public class DmfbDrawer
 	public static void DrawHardware(HardwareParser hp, DrawOptions drawOptions, Main main) throws IOException
 	{
 		//Map<Integer, ArrayList<String>> nodesAtMod;
-		//ArrayList<AssayNode> ioNodes;		
+		//ArrayList<AssayNode> ioNodes;	
 
 		// Extract data from the parser
 		Map<Integer, ArrayList<String>> coordsAtPin = hp.getCoordsAtPin();
 		Map<Integer, ArrayList<WireSegment>> wireSegsToPin = hp.getWireSegsToPin();
+		ArrayList<WireSegment> wireSegsToIC = hp.getWireSegsToIC();
 		DmfbArch da = new DmfbArch();			
 		da.ExternalResources = hp.getExternalResources();
 		da.ResourceLocations = hp.getResourceLocations();
 		da.numXcells = hp.getNumXcells();
 		da.numYcells = hp.getNumYcells();
 		da.numHTracks = hp.getNumHTracks();
-		da.numVTracks = hp.getNumVTracks();
+		da.numVTracks = hp.getNumVTracks();	// TODO: THIS IS PROBABLY WHERE THE IMAGEs ARE MADE
 		da.numXwireCells = hp.getNumXwireCells();
 		da.numYwireCells = hp.getNumYwireCells();
 
 		da.IoPorts = hp.getIoPorts();
 
-		// Set the unit dimensions
 		SetDmfbUnitDims(da, drawOptions.maxWidth, drawOptions.maxHeight);
 
-		BufferedImage biHw = DrawBlankDmfb(da, drawOptions, coordsAtPin, wireSegsToPin);
+		drawOptions.currentLayer = 0;
+		BufferedImage biHw = DrawBlankDmfb(da, drawOptions, coordsAtPin, wireSegsToPin, wireSegsToIC);
 		File f = new File(outDir + "/" + "HW" + "." + ext);
-		ImageIO.write(biHw, ext, f);
+		ImageIO.write(biHw, ext, f);	// TODO: HARDWARE
 
 		// Change settings for proper output of individual pins
 		drawOptions.drawPinNumbers = false;
 		drawOptions.drawWireSegments = false;
 
+		// Calculate orthogonal capacity
+		HardwareConstants.orthogonalCapacity = 3;
+
+		// Create, draw, and add an image that has all layers
+		if (coordsAtPin != null)
+		{
+			BufferedImage allLayerImage = DrawBlankDmfb(da, drawOptions, coordsAtPin, wireSegsToPin, wireSegsToIC);
+			Graphics2D layerG2d = ((Graphics2D)allLayerImage.getGraphics());
+			
+			// Draw area routing wires on images
+			for(WireSegment ws: wireSegsToIC)
+			{
+				layerG2d.setStroke(new BasicStroke(thickStroke));
+
+				// Draw the wire on this layer image
+				DrawWire(ws, layerG2d, hp);
+			}
+
+			// For each pin, draw array wires
+			int pinCount = 0;
+			for (Integer pin : coordsAtPin.keySet())
+			{				
+				// Get the graphics engine for the appropriate layer
+				ArrayList<WireSegment> wire = wireSegsToPin.get(pin);
+
+				if (wire != null && wire.size() > 0)
+				{
+					layerG2d.setStroke(new BasicStroke(thickStroke));
+				}
+				else
+				{
+					layerG2d.setStroke(new BasicStroke(thickStroke));
+				}		
+				DrawPinAndWireNet(pin, hp, layerG2d, true);
+			}
+			
+			if (!main.isOutputting())
+				return;
+
+				f = new File(outDir + "/All Layers." + ext);
+				
+			ImageIO.write(allLayerImage, ext, f);
+		}
+
 		// Create a blank DMFB board for each layer 
 		ArrayList<BufferedImage> layerImages = new ArrayList<BufferedImage>();
 		for (int i = 0; i <= hp.getNumLayers(); i++)
-			layerImages.add(DrawBlankDmfb(da, drawOptions, coordsAtPin, wireSegsToPin));
+		{
+			if(i != hp.getNumLayers())
+			{
+				drawOptions.currentLayer = i;
+			}
+			else
+			{
+				drawOptions.currentLayer = 0;
+			}
+
+			layerImages.add(DrawBlankDmfb(da, drawOptions, coordsAtPin, wireSegsToPin, wireSegsToIC));
+		}
 
 		// Draw the layer images first because they are more useful
+		ArrayList<Integer> pinLayers = new ArrayList<Integer>();
 		if (coordsAtPin != null)
 		{
-			// For each pin
+			// Draw area routing wires on images
+			for(WireSegment ws: wireSegsToIC)
+			{
+				Graphics2D layerG2d = ((Graphics2D)layerImages.get(ws.layer).getGraphics());
+				layerG2d.setStroke(new BasicStroke(thickStroke));
+
+				// Draw the wire on this layer image
+				DrawWire(ws, layerG2d, hp);
+			}
+
+			// For each pin, draw array wires
 			int pinCount = 0;
 			for (Integer pin : coordsAtPin.keySet())
 			{				
 				// Get the graphics engine for the appropriate layer
 				Graphics2D layerG2d = null;
 				ArrayList<WireSegment> wire = wireSegsToPin.get(pin);
+
 				if (wire != null && wire.size() > 0)
 				{
+					pinLayers.add(wireSegsToPin.get(pin).get(0).layer);
 					layerG2d = ((Graphics2D)layerImages.get(wire.get(0).layer).getGraphics());
 					layerG2d.setStroke(new BasicStroke(thickStroke));
 				}
@@ -1568,10 +1830,10 @@ public class DmfbDrawer
 					layerG2d = ((Graphics2D)layerImages.get(layerImages.size()-1).getGraphics());
 					layerG2d.setStroke(new BasicStroke(thickStroke));
 				}		
-				DrawPinAndWireNet(pin, hp, layerG2d);
+				DrawPinAndWireNet(pin, hp, layerG2d, true);
 			}
 		}
-		
+
 		// Now output an image for each layer
 		for (int i = 0; i < layerImages.size(); i++)
 		{
@@ -1581,7 +1843,7 @@ public class DmfbDrawer
 			if (i < layerImages.size()-1)
 				f = new File(outDir + "/Layer" + (i+1) + "." + ext);
 			else
-				f = new File(outDir + "/RoutingFailures" + "." + ext);
+				f = new File(outDir + "/RoutingFailures" + "." + ext);	// TODO: HERE ARE THE LAYERS (1,2,ROUTING FAILURES)
 			ImageIO.write(layerImages.get(i), ext, f);
 			main.updateProgress((int)((double)i/(double)layerImages.size()*100), "Drawing Layer " + i + "/" + layerImages.size());
 		}
@@ -1594,18 +1856,27 @@ public class DmfbDrawer
 			int pinCount = 0;
 			for (Integer pin : coordsAtPin.keySet())
 			{
+				if(pin == -1)
+				{
+					drawOptions.currentLayer = 0;
+				}
+				else
+				{
+					drawOptions.currentLayer = pinLayers.get(pin-1);
+				}
+
 				if (!main.isOutputting())
 					return;
 
 				if (pin >= 0)
 				{
 					// Create blank image and draw pin/wire info onto it
-					BufferedImage pinDmfb = DrawBlankDmfb(da, drawOptions, coordsAtPin, null);
+					BufferedImage pinDmfb = DrawBlankDmfb(da, drawOptions, coordsAtPin, null, null);
 					Graphics2D pinG2d = (Graphics2D)pinDmfb.getGraphics();
-					DrawPinAndWireNet(pin, hp, pinG2d);
-					
+					DrawPinAndWireNet(pin, hp, pinG2d, false);
+
 					// Write it out to file
-					f = new File(outDir + "/Pin" + pin + "." + ext);
+					f = new File(outDir + "/Pin" + pin + "." + ext);	// TODO: HERE IS PIN NUMBERS
 					ImageIO.write(pinDmfb, ext, f);
 					main.updateProgress((int)((double)pinCount/(double)coordsAtPin.size()*100), "Drawing Pin " + pinCount + "/" + coordsAtPin.size());
 					pinCount++;
@@ -1617,15 +1888,45 @@ public class DmfbDrawer
 		main.updateProgress(100, "Pin Drawing Complete");
 	}
 
-
-	public static void DrawPinAndWireNet(int pinNumber, HardwareParser hp, Graphics2D g2D)
+	public static void DrawWire(WireSegment ws, Graphics2D g2D, HardwareParser hp)
 	{
+		Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.ORANGE, Color.MAGENTA, Color.PINK, Color.CYAN, Color.YELLOW};
+		int wrOffset = ioLong - cellDim / 2; // DMFB contains invisible ring of electrodes, so start just off DMFB	    	    			
+		int numXGridPerPin = (hp.getNumXwireCells()-1) / (hp.getNumXcells()+1); // # X-Grid quantiles between pins
+		int numYGridPerPin = (hp.getNumYwireCells()-1) / (hp.getNumYcells()+1); // # X-Grid quantiles between pins
+		float trackDimX = ((float)cellDim / (float)(numXGridPerPin));
+		float trackDimY = ((float)cellDim / (float)(numYGridPerPin));
+		int maxLayers = HardwareConstants.COLORS.length;
 
+		g2D.setColor(Color.RED);
+		Stroke oldStroke = g2D.getStroke();
+		g2D.setStroke(new BasicStroke(thickStroke));
+
+		g2D.setColor(colors[ws.layer % maxLayers]);
+
+		if (ws.segmentType == SEGTYPE.LINE)
+		{
+			int x1 = (ws.sourceGridCellX / numXGridPerPin) * cellDim + (int)((ws.sourceGridCellX % numXGridPerPin) * trackDimX);
+			int y1 = (ws.sourceGridCellY / numYGridPerPin) * cellDim + (int)((ws.sourceGridCellY % numYGridPerPin) * trackDimY);
+			int x2 = wrOffset + (ws.destGridCellX / numXGridPerPin) * cellDim + (int)((ws.destGridCellX % numXGridPerPin) * trackDimX);
+			int y2 = wrOffset + (ws.destGridCellY / numYGridPerPin) * cellDim + (int)((ws.destGridCellY % numYGridPerPin) * trackDimY);
+
+			g2D.drawLine(x1, y1, x2 + arrayOffsetX, y2 + arrayOffsetY);
+		}
+		else
+			MFError.DisplayError("Unknown wire-segment type.");
+
+		g2D.setStroke(oldStroke);
+	}
+
+	public static void DrawPinAndWireNet(int pinNumber, HardwareParser hp, Graphics2D g2D, boolean ignoreAreaRouting)
+	{
 		// Extract data from the parser
 		Map<Integer, ArrayList<String>> coordsAtPin = hp.getCoordsAtPin();
 		Map<Integer, ArrayList<WireSegment>> wireSegsToPin = hp.getWireSegsToPin();
+		ArrayList<WireSegment> wireSegsToIC = hp.getWireSegsToIC();
 
-		// Draw pin and wires using the givenGraphics2D object
+		// Draw pin and wires using the given Graphics2D object
 		if (pinNumber >= 0)
 		{
 			ArrayList<String> coords = coordsAtPin.get(pinNumber);
@@ -1643,7 +1944,7 @@ public class DmfbDrawer
 
 					Color pinInterestColor = new Color(1.0f, 1.0f, 0.717f, 0.5f); // Light Yellow
 					g2D.setColor(pinInterestColor);
-					g2D.fillRect(ioLong + x * cellDim, ioLong + y * cellDim, cellDim, cellDim);
+					g2D.fillRect(ioLong + x * cellDim + arrayOffsetX, ioLong + y * cellDim + arrayOffsetY, cellDim, cellDim);
 
 					int fontSize = cellDim/2;
 					Font font = new Font("Arial", Font.BOLD, fontSize);
@@ -1654,41 +1955,92 @@ public class DmfbDrawer
 			}
 
 			// Now draw wire segments
-			Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.ORANGE, Color.MAGENTA, Color.PINK, Color.CYAN, Color.YELLOW};
-			int maxLayers = colors.length;
+			int maxLayers = HardwareConstants.COLORS.length;
 			if (wire != null)
 			{
 				// Compute re-usable offsets and dimensions
+				Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.ORANGE, Color.MAGENTA, Color.PINK, Color.CYAN, Color.YELLOW};
 				int wrOffset = ioLong - cellDim / 2; // DMFB contains invisible ring of electrodes, so start just off DMFB	    	    			
 				int numXGridPerPin = (hp.getNumXwireCells()-1) / (hp.getNumXcells()+1); // # X-Grid quantiles between pins
 				int numYGridPerPin = (hp.getNumYwireCells()-1) / (hp.getNumYcells()+1); // # X-Grid quantiles between pins
 				float trackDimX = ((float)cellDim / (float)(numXGridPerPin));
 				float trackDimY = ((float)cellDim / (float)(numYGridPerPin));
 
+				// Draw IC wiring
+				Stroke oldStroke = g2D.getStroke();
+				if(!ignoreAreaRouting)
+				{
+					g2D.setColor(Color.RED);
+					oldStroke = g2D.getStroke();
+					g2D.setStroke(new BasicStroke(thickStroke));
+					for(int i = 0; i < wireSegsToIC.size(); i++)
+					{
+						if(pinNumber == wireSegsToIC.get(i).pinNo * -1)
+						{
+							WireSegment ws = wireSegsToIC.get(i);
+
+							//if (ws.layer >= maxLayers)
+							//	MFError.DisplayError("Currently not enough colors available for more than " + maxLayers + " layers. Multiple layers will share colors.");
+
+							g2D.setColor(colors[ws.layer % maxLayers]);
+
+
+							if (ws.segmentType == SEGTYPE.LINE)
+							{
+								int x1 = (ws.sourceGridCellX / numXGridPerPin) * cellDim + (int)((ws.sourceGridCellX % numXGridPerPin) * trackDimX);
+								int y1 = (ws.sourceGridCellY / numYGridPerPin) * cellDim + (int)((ws.sourceGridCellY % numYGridPerPin) * trackDimY);
+								int x2 = wrOffset + (ws.destGridCellX / numXGridPerPin) * cellDim + (int)((ws.destGridCellX % numXGridPerPin) * trackDimX);
+								int y2 = wrOffset + (ws.destGridCellY / numYGridPerPin) * cellDim + (int)((ws.destGridCellY % numYGridPerPin) * trackDimY);
+
+								g2D.drawLine(x1, y1, x2 + arrayOffsetX, y2 + arrayOffsetY);
+							}
+							else
+								MFError.DisplayError("Unknown wire-segment type.");
+						}
+					}
+				}
+
+				g2D.setStroke(oldStroke);
+
 				for (int i = 0; i < wire.size(); i++)
 				{
 					WireSegment ws = wire.get(i);
 
 					//if (ws.layer >= maxLayers)
-						//	MFError.DisplayError("Currently not enough colors available for more than " + maxLayers + " layers. Multiple layers will share colors.");
-					g2D.setColor(colors[ws.layer % maxLayers]);
+					//	MFError.DisplayError("Currently not enough colors available for more than " + maxLayers + " layers. Multiple layers will share colors.");
+					g2D.setColor(HardwareConstants.COLORS[ws.layer % maxLayers]);
 
+					int x1 = 0;
+					int y1 = 0;
+					boolean isEnd = false;
 					if (ws.segmentType == SEGTYPE.LINE)
 					{
-						int x1 = wrOffset + (ws.sourceGridCellX / numXGridPerPin) * cellDim + (int)((ws.sourceGridCellX % numXGridPerPin) * trackDimX);
-						int y1 = wrOffset + (ws.sourceGridCellY / numYGridPerPin) * cellDim + (int)((ws.sourceGridCellY % numYGridPerPin) * trackDimY);
+						x1 = wrOffset + (ws.sourceGridCellX / numXGridPerPin) * cellDim + (int)((ws.sourceGridCellX % numXGridPerPin) * trackDimX);
+						y1 = wrOffset + (ws.sourceGridCellY / numYGridPerPin) * cellDim + (int)((ws.sourceGridCellY % numYGridPerPin) * trackDimY);
 						int x2 = wrOffset + (ws.destGridCellX / numXGridPerPin) * cellDim + (int)((ws.destGridCellX % numXGridPerPin) * trackDimX);
 						int y2 = wrOffset + (ws.destGridCellY / numYGridPerPin) * cellDim + (int)((ws.destGridCellY % numYGridPerPin) * trackDimY);
+						// TODO: HERE IS WHERE THE WIRES ARE MADE
 
-						g2D.drawLine(x1, y1, x2, y2);
+						if(ws.sourceGridCellX == 0)
+							isEnd = true;
+						else isEnd = false;
+
+						g2D.drawLine(x1 + arrayOffsetX, y1 + arrayOffsetY, x2 + arrayOffsetX, y2 + arrayOffsetY);
 					}
 					else
 						MFError.DisplayError("Unknown wire-segment type.");
+
+					//					if(ws.pinNo == 1 && isEnd)
+					//					{
+					//						g2D.drawLine(x1 + arrayOffsetX, y1 + arrayOffsetY, TEST_PIN_X, TEST_PIN_Y);
+					//					}
 				}
 			}
 		}			
 	} // End DrawPinAndWireNet
 
+	public static int getArrayOffsetX() { return arrayOffsetX; }
+	public static int getArrayOffsetY() { return arrayOffsetY; }
 }
 
 

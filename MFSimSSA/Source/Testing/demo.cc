@@ -337,6 +337,21 @@ void Demo::WireRoutingCase(int oCap, int testNum)
 		CopyArchFile("DmfbArchs/FPPC/Enhanced_TCAD/WireRoutingTesting/EnhancedFPPC_IA_8.txt");
 		Synthesis::WireRoute(inFileName, PATH_FINDER_WR, oCap, oCap);
 	}
+	else if (testNum == 19)
+	{
+		CopyArchFile("DmfbArchs/IndividuallyAddressable/Testing/Arch_10_16.txt");
+		Synthesis::WireRoute(inFileName, PATH_FINDER_WR, oCap, oCap);
+	}
+	else if (testNum == 20)
+	{
+		CopyArchFile("DmfbArchs/IndividuallyAddressable/Testing/Arch_15_15.txt");
+		Synthesis::WireRoute(inFileName, PATH_FINDER_WR, oCap, oCap);
+	}
+	else if (testNum == 21)
+	{
+		CopyArchFile("DmfbArchs/IndividuallyAddressable/Testing/Arch_10_30.txt");
+		Synthesis::WireRoute(inFileName, PATH_FINDER_WR, oCap, oCap);
+	}
 	else
 		claim(false, "Unknown test-case number for IndividuallyAddressableDMFB() demo.");
 }
