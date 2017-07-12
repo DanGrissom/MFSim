@@ -1,0 +1,1 @@
+The Dag in question is an "empty" dag, technically is the branch head on a while loop. Effectively it passes the DAG from the entry to either the loop or the false branch.

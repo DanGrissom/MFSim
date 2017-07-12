@@ -1920,10 +1920,11 @@ void BioCoder :: store_until(Container& container1, float temp, enum until type)
 	}
 	switch(type)
 	{
-	case ETHANOL_EVAP:if (temp == RT)
-		fprintf(htmlFilePtr, "Store %s at <b><font color=#357EC7>room temperature</font></b> until the ethanol has evaporated and no fluid is visible in the tube.<br>", container1.contents.new_name);
-	else
-		fprintf(htmlFilePtr, "Store %s at <b><font color=#357EC7>%g%cC</font></b> until the ethanol has evaporated and no fluid is visible in the tube.<br>", container1.contents.new_name, temp, 0x00B0);break;
+	case ETHANOL_EVAP:
+		if (temp == RT)
+			fprintf(htmlFilePtr, "Store %s at <b><font color=#357EC7>room temperature</font></b> until the ethanol has evaporated and no fluid is visible in the tube.<br>", container1.contents.new_name);
+		else
+			fprintf(htmlFilePtr, "Store %s at <b><font color=#357EC7>%g%cC</font></b> until the ethanol has evaporated and no fluid is visible in the tube.<br>", container1.contents.new_name, temp, 0x00B0);break;
 	case OD:fprintf(htmlFilePtr, "Incubate %s at <b><font color=#357EC7>%g%cC</font></b> until the O.D.600 reaches 0.6.<br>", container1.contents.new_name, temp, 0x00B0);break;
 	case THAW:fprintf(htmlFilePtr, "Allow %s to thaw at <b><font color=#357EC7>room temperature</font></b>.<br>", container1.contents.new_name);break;
 	case COOLED:fprintf(htmlFilePtr, "Keep %s at <b><font color=#357EC7>room temperature</font></b> until cooled.<br>", container1.contents.new_name);break;
@@ -1939,10 +1940,11 @@ void BioCoder :: store_until(Container& container1, float temp, enum until type,
 	proSteps->addToLinkMap(container1, name);
 	switch(type)
 	{
-	case ETHANOL_EVAP:if (temp == RT)
-		fprintf(htmlFilePtr, "Store %s at <b><font color=#357EC7>room temperature</font></b> until the ethanol has evaporated and no fluid is visible in the tube (~", container1.contents.new_name);
-	else
-		fprintf(htmlFilePtr, "Store %s at <b><font color=#357EC7>%g%cC</font></b> until the ethanol has evaporated and no fluid is visible in the tube (~", container1.contents.new_name);break;
+	case ETHANOL_EVAP:
+		if (temp == RT)
+			fprintf(htmlFilePtr, "Store %s at <b><font color=#357EC7>room temperature</font></b> until the ethanol has evaporated and no fluid is visible in the tube (~", container1.contents.new_name);
+		else
+			fprintf(htmlFilePtr, "Store %s at <b><font color=#357EC7>%g%cC</font></b> until the ethanol has evaporated and no fluid is visible in the tube (~", container1.contents.new_name);break;
 	case OD:fprintf(htmlFilePtr, "Incubate %s at <b><font color=#357EC7>%g%cC</font></b> until the O.D.600 reaches 0.6 (~", container1.contents.new_name);break;
 	case THAW:fprintf(htmlFilePtr, "Allow %s to thaw at <b><font color=#357EC7>room temperature</font></b> (~", container1.contents.new_name);break;
 	case COOLED:fprintf(htmlFilePtr, "Keep %s at <b><font color=#357EC7>room temperature</font></b> until cooled (~", container1.contents.new_name);break;
@@ -2160,7 +2162,7 @@ string BioCoder :: ce_detect (Container& container1, float length, float volt_pe
 	}
 	fprintf(htmlFilePtr, "Detect/separate %s by capillary electrophoresis with the following settings - <b><font color=#357EC7>%g</font></b> cm at <b><font color=#357EC7>%g</font></b> V/cm using %s.<br>", container1.contents.new_name, length, volt_per_cm, fluid1.new_name);
 	name_sample(container1, "separated flow");
-return linkName;
+	return linkName;
 }
 
 string BioCoder :: ce_detect (Container& container1, float length, float volt_per_cm, Fluid& fluid1, Time time1)
@@ -2214,7 +2216,7 @@ string BioCoder :: measure_fluorescence (Container& container1, Time time1)
 		all_nodes-> create_edge(o.node, container1.node);
 	}
 	fprintf(htmlFilePtr, "Measure the fluorescence of %s.<br>", container1.contents.new_name);
-return linkName;
+	return linkName;
 }
 
 

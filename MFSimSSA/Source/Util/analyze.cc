@@ -716,6 +716,12 @@ string Analyze::AnalyzeRoutes(DmfbArch *arch, map<Droplet *, vector<RoutePoint *
 	for (; routesIt != routes->end(); routesIt++)
 	{
 
+		if (routesIt->second->empty())
+		{
+			cout << "Done." << endl;
+			return "No failures discovered (no routing points in route).";
+		}
+
 		RoutePoint *lastRp = routesIt->second->back();
 
 		// 1.) Check that all droplets marked as output are next to an output port...

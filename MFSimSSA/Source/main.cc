@@ -28,20 +28,12 @@
 #define _MAIN
 
 using namespace std;
-#include "../Headers/Testing/biocode_test.h"
 #include "../Headers/Testing/test.h"
 #include "../Headers/Testing/demo.h"
 #include "../Headers/command_line.h"
-#include "../Headers/synthesis.h"
 #include "../Headers/Resources/enums.h"
 #include "../Headers/compatibility_check.h"
 #include <math.h>
-
-#include "../Headers/Models/compiled_cfg.h"
-#include "../Headers/Models/cfg.h"
-
-// TEMPORARY - DTG
-#include "../Headers/Util/file_out.h"
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Main function called when starting program.
@@ -66,47 +58,34 @@ int main(int argc, char **argv)
 		{
 			cout << "Executing Hard-coded DMFB Simulation" << endl << "-----------------------------------------------"<< endl;
 
+			//////////////////////////////////////////////////////////////////////
+			// Demos executing DAGs on individually addressable DMFBs
+			Demo::IndividuallyAddressableDMFB(true, true, true, PCR_BM);
+			//Demo::RoutingBasedSynthesis(true, PROTEIN_BM);
+
+			//////////////////////////////////////////////////////////////////////
+			// Demos executing DAGs on pin-constrained DMFBs
 			//Demo::FieldProgrammablePinConstrainedDMFB(true, true, true, PROTEIN_SPLIT_1_BM);
-			//Test::RoutingBasedSynthesis(true, PROTEIN_BM);
-			//Demo::IndividuallyAddressableDMFB(true, true, false, PCR_BM);
 			//Demo::CliquePartitionedDMFB(true, false, false, PCR_BM);
-			//for (int i = 1; i <= 19; i++)
-				Demo::WireRoutingCase(3, 3);
+
+			//////////////////////////////////////////////////////////////////////
+			// Demos performing wire routing on DMFBs
+			//for (int i = 20; i <= 20; i++)
+			//	Demo::WireRoutingCase(3, i);
 			//Demo::PinMapWireRouteFlow(SWITCH_PM, PIN_MAPPER_INHERENT_WR, 3, 10);
 			//Demo::PinMapWireRouteFlow(CLIQUE_PM, PATH_FINDER_WR, 3, 10);
-			//Demo::MySandboxCode();
 
-			// Non-BioCoder Conditional Tests
-			//CFG *cfg = Demo::Create_Conditional_Demo_CFG();
-			//CFG *cfg = Demo::Create_FaultTolerant_Split_Demo1_CFG();
-			//CFG *cfg = Demo::Create_FaultTolerant_Split_Demo2_CFG();
+			//////////////////////////////////////////////////////////////////////
+			// Method for trying your own implementation flows
+			//Test::MySandboxCode();
 
-			// SSA Dynamic System
-			Synthesis *synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/Testing/Arch_15_19_SampleReagent.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
-			//CFG *cfg = BiocodeTest::Create_Conditional_Demo_CFG(false);										// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
-			//CFG *cfg = BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(false);			// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
-			//CFG *cfg = BiocodeTest::Create_Compound_Conditional_With_Transfer_Droplets_Demo_CFG(false);		// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
-			CFG *cfg = BiocodeTest::Create_Conditional_Runcount_With_Transfer_Droplets_Demo_CFG(false);			// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
-			//CFG *cfg = BiocodeTest::Create_Conditional_With_Transfer_Droplets_Demo_CFG(false);				// LS Pass; LEB Pass; RMR-R Pass (Merge case); Complete; File I/O Pass	 	//*Good Example
-			//CFG *cfg = BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(.8, false);					// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
-			//CFG *cfg = BiocodeTest::Create_Conditional_Probabilistic_PCR_CFG(.8, false);						// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
+			//////////////////////////////////////////////////////////////////////
+			// Demos executing CFGs on individually addressable DMFBs
+			//Demo::Create_Compile_Execute_Biocoder_CFG(1);
 
-			//Synthesis *synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
-			//CFG *cfg = BiocodeTest::Create_Conditional_B2_InVitroDiag_CFG(4, 4, "none", 1, 1, 1, false);		// LS Pass; LEB Pass; RMR-R Pass
-
-			//Synthesis *synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
-			//CFG *cfg = BiocodeTest::Create_Conditional_B3_Protein_FaultTolerant_CFG(1, 1, 1, false);			// LS Pass; LEB Pass; RMR-R Pass (Merge cases)
-
-			// Testing CFG file I/O methods
-			//FileOut::WriteCfgToFile(cfg, "Test/", cfg->getName() + ".cfg");
-			//CFG *cfgIn = FileIn::ReadCfgFromFile("Test/" +  cfg->getName() + ".cfg");
-
-			CompiledCFG *compiledCFG = new CompiledCFG(synthesisEngine, cfg);
-			compiledCFG->execute();
-			compiledCFG->outputSimulationFiles();
-			delete compiledCFG;
-			delete cfg;
-			//delete cfgIn;
+			//////////////////////////////////////////////////////////////////////
+			// Other Utility Methods
+			//Test::CFGFileIOTest();
 
 			cout << "-----------------------------------------------" << endl << "Exiting the UCR DMFB SSS Simulator" << endl;
 		}

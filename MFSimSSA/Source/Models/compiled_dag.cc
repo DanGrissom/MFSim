@@ -190,6 +190,8 @@ void CompiledDAG::routeDAG()
 	//Synthesis::printWireRoutingStats(arch);
 
 	FileOut::WriteRoutedDagAndArchToFile(uncompiledDAG, arch, router, rModules, routes, dirtyCells, pinActivations, tsBeginningCycle, "Output/3_ROUTE_to_SIM_" + getPrintableName() + ".txt");
+	if (CompatChk::CanPerformCompactSimulation(router))
+		FileOut::WriteCompactedRoutesToFile(uncompiledDAG, arch, rModules, routes, tsBeginningCycle, "Output/3_COMPACT_ROUTE_to_SIM_" + getPrintableName() + ".txt");
 	cout << endl;
 	//FileOut::WriteHardwareFileWithWireRoutes(arch, "Output/4_HARDWARE_DESCRIPTION.txt", true);
 }

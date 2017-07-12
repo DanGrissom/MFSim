@@ -761,6 +761,14 @@ void FileOut::WriteRoutedDagAndArchToFile(DAG *dag, DmfbArch *arch, Router *rout
 	//for (int i = 0; i < 200; i++)
 	//	tsBeginningCycle->push_back(12345);
 
+	// Are module occurrance lengths dictated by time-steps or cycles
+	os << endl << "// Reconfigurable module delta type (cycles or time-steps)" << endl;
+	os << "MODULEDELTATYPE (";
+	// So far, only the routing-based synthesis router uses cycles as it's module-length delta
+	if (router->getType() == ROUTING_BASED_SYNTHESIS_R)
+		os << C_MDT << ")" << endl;
+	else
+		os << TS_MDT << ")" << endl;
 
 	// Are module occurrance lengths dictated by time-steps or cycles
 	os << endl << "// Reconfigurable module delta type (cycles or time-steps)" << endl;
@@ -818,8 +826,11 @@ void FileOut::WriteRoutedDagAndArchToFile(DAG *dag, DmfbArch *arch, Router *rout
 	map<Droplet *, vector<RoutePoint *> *>::iterator it = routes->begin();
 	unsigned long long firstCycle = 10000000000000;
 	unsigned long long lastCycle = 0;
+	bool allRoutesEmpty = true;
 	while (it != routes->end())
 	{
+		if (!it->second->empty())
+			allRoutesEmpty = false;
 		if (!it->second->empty() && it->second->front()->cycle < firstCycle)
 			firstCycle = it->second->front()->cycle;
 		if (!it->second->empty() && it->second->back()->cycle > lastCycle)
@@ -827,24 +838,26 @@ void FileOut::WriteRoutedDagAndArchToFile(DAG *dag, DmfbArch *arch, Router *rout
 		it++;
 	}
 
-	// Create string stream for each cycle
-	vector<stringstream *> cycleStrings;
-	for (unsigned i = firstCycle; i <= lastCycle+1; i++)
+	if (!allRoutesEmpty)
 	{
-		stringstream *ss = new stringstream();
-		(*ss) << "=======================Commit Cycle " << i << "=======================" << endl;
-		cycleStrings.push_back(ss);
-	}
-
-	// Add routing points to appropriate cycle
-	for (it = routes->begin(); it != routes->end(); it++)
-	{
-		vector<RoutePoint *> *route = it->second;
-		for (unsigned i = 0; i < route->size(); i++)
+		// Create string stream for each cycle
+		vector<stringstream *> cycleStrings;
+		for (unsigned i = firstCycle; i <= lastCycle+1; i++)
 		{
-			RoutePoint *rp = route->at(i);
+			stringstream *ss = new stringstream();
+			(*ss) << "=======================Commit Cycle " << i << "=======================" << endl;
+			cycleStrings.push_back(ss);
+		}
 
-			/*(*cycleStrings.at(rp->cycle - cycle)) << "Droplet " << it->first->getId() << ", Cell: (" << rp->x << ", " << rp->y << ")";
+		// Add routing points to appropriate cycle
+		for (it = routes->begin(); it != routes->end(); it++)
+		{
+			vector<RoutePoint *> *route = it->second;
+			for (unsigned i = 0; i < route->size(); i++)
+			{
+				RoutePoint *rp = route->at(i);
+
+				/*(*cycleStrings.at(rp->cycle - cycle)) << "Droplet " << it->first->getId() << ", Cell: (" << rp->x << ", " << rp->y << ")";
 
 			if (rp->dStatus == DROP_PROCESSING)
 				(*cycleStrings.at(rp->cycle - cycle)) << "--PROCESSING";
@@ -864,98 +877,98 @@ void FileOut::WriteRoutedDagAndArchToFile(DAG *dag, DmfbArch *arch, Router *rout
 				(*cycleStrings.at(rp->cycle - cycle)) << "--WASTING";
 			(*cycleStrings.at(rp->cycle - cycle)) << endl;*/
 
-			(*cycleStrings.at(rp->cycle - firstCycle)) << "C (";
-			if (rp->dStatus == DROP_PROCESSING)
-				(*cycleStrings.at(rp->cycle - firstCycle)) << "D_PROC";
-			else if (rp->dStatus == DROP_MERGING)
-				(*cycleStrings.at(rp->cycle - firstCycle)) << "D_MERGE";
-			else if (rp->dStatus == DROP_SPLITTING)
-				(*cycleStrings.at(rp->cycle - firstCycle)) << "D_SPLIT";
-			else if (rp->dStatus == DROP_OUTPUT)
-				(*cycleStrings.at(rp->cycle - firstCycle)) << "D_OUT";
-			else if (rp->dStatus == DROP_TRANSFER_OUT)
-				(*cycleStrings.at(rp->cycle - firstCycle)) << "D_TRANS_OUT";
-			else if (rp->dStatus == DROP_TRANSFER_IN)
-				(*cycleStrings.at(rp->cycle - firstCycle)) << "D_TRANS_IN";
-			else if (rp->dStatus == DROP_TRANSFER_IN_MERGE)
-				(*cycleStrings.at(rp->cycle - firstCycle)) << "D_TRANS_IN_MERGE";
-			else if (rp->dStatus == DROP_WAIT)
-				(*cycleStrings.at(rp->cycle - firstCycle)) << "D_PROC_WAIT";
-			else if (rp->dStatus == DROP_INT_WAIT)
-				(*cycleStrings.at(rp->cycle - firstCycle)) << "D_INT_WAIT";
-			else if (rp->dStatus == DROP_WASH)
-				(*cycleStrings.at(rp->cycle - firstCycle)) << "D_WASH";
-			else if (rp->dStatus == DROP_WASTE)
-				(*cycleStrings.at(rp->cycle - firstCycle)) << "D_WASTE";
-			else
-				(*cycleStrings.at(rp->cycle - firstCycle)) << "D_NORM";
-			(*cycleStrings.at(rp->cycle - firstCycle)) << ", " << it->first->getId() << ", " << rp->x << ", " << rp->y << ")" << endl;
+				(*cycleStrings.at(rp->cycle - firstCycle)) << "C (";
+				if (rp->dStatus == DROP_PROCESSING)
+					(*cycleStrings.at(rp->cycle - firstCycle)) << "D_PROC";
+				else if (rp->dStatus == DROP_MERGING)
+					(*cycleStrings.at(rp->cycle - firstCycle)) << "D_MERGE";
+				else if (rp->dStatus == DROP_SPLITTING)
+					(*cycleStrings.at(rp->cycle - firstCycle)) << "D_SPLIT";
+				else if (rp->dStatus == DROP_OUTPUT)
+					(*cycleStrings.at(rp->cycle - firstCycle)) << "D_OUT";
+				else if (rp->dStatus == DROP_TRANSFER_OUT)
+					(*cycleStrings.at(rp->cycle - firstCycle)) << "D_TRANS_OUT";
+				else if (rp->dStatus == DROP_TRANSFER_IN)
+					(*cycleStrings.at(rp->cycle - firstCycle)) << "D_TRANS_IN";
+				else if (rp->dStatus == DROP_TRANSFER_IN_MERGE)
+					(*cycleStrings.at(rp->cycle - firstCycle)) << "D_TRANS_IN_MERGE";
+				else if (rp->dStatus == DROP_WAIT)
+					(*cycleStrings.at(rp->cycle - firstCycle)) << "D_PROC_WAIT";
+				else if (rp->dStatus == DROP_INT_WAIT)
+					(*cycleStrings.at(rp->cycle - firstCycle)) << "D_INT_WAIT";
+				else if (rp->dStatus == DROP_WASH)
+					(*cycleStrings.at(rp->cycle - firstCycle)) << "D_WASH";
+				else if (rp->dStatus == DROP_WASTE)
+					(*cycleStrings.at(rp->cycle - firstCycle)) << "D_WASTE";
+				else
+					(*cycleStrings.at(rp->cycle - firstCycle)) << "D_NORM";
+				(*cycleStrings.at(rp->cycle - firstCycle)) << ", " << it->first->getId() << ", " << rp->x << ", " << rp->y << ")" << endl;
+			}
 		}
-	}
 
-	for (unsigned i = 0; i < cycleStrings.size(); i++)
-	{
-		// cycleStrings might not start at the same cycle as dirtyCells
-		if (i+firstCycle < dirtyCells->size())
+		for (unsigned i = 0; i < cycleStrings.size(); i++)
 		{
-			vector<RoutePoint *> *cells = dirtyCells->at(i+firstCycle);
-			if (cells->size() > 0)
+			// cycleStrings might not start at the same cycle as dirtyCells
+			if (i+firstCycle < dirtyCells->size())
 			{
-				(*cycleStrings.at(i)) << "Dirty (";
-				for (unsigned j = 0; j < cells->size(); j++)
+				vector<RoutePoint *> *cells = dirtyCells->at(i+firstCycle);
+				if (cells->size() > 0)
 				{
-					RoutePoint *rp = cells->at(j);
-					(*cycleStrings.at(i)) << ((rp->y*arch->getNumCellsX()) + rp->x) << ", " << rp->droplet->getId();
-					//cout << ((rp->y*arch->getNumCellsX()) + rp->x) << ", " << rp->droplet->getId();
-					if (j != cells->size()-1)
-						(*cycleStrings.at(i)) << ", ";
-					//(*cycleStrings.at(i-firstCycle)) << "C (";
-					//(*cycleStrings.at(i-firstCycle)) << "C_DIRTY";
-					//(*cycleStrings.at(i-firstCycle)) << ", " << rp->droplet->getId() << ", " << rp->x << ", " << rp->y << ")" << endl;
+					(*cycleStrings.at(i)) << "Dirty (";
+					for (unsigned j = 0; j < cells->size(); j++)
+					{
+						RoutePoint *rp = cells->at(j);
+						(*cycleStrings.at(i)) << ((rp->y*arch->getNumCellsX()) + rp->x) << ", " << rp->droplet->getId();
+						//cout << ((rp->y*arch->getNumCellsX()) + rp->x) << ", " << rp->droplet->getId();
+						if (j != cells->size()-1)
+							(*cycleStrings.at(i)) << ", ";
+						//(*cycleStrings.at(i-firstCycle)) << "C (";
+						//(*cycleStrings.at(i-firstCycle)) << "C_DIRTY";
+						//(*cycleStrings.at(i-firstCycle)) << ", " << rp->droplet->getId() << ", " << rp->x << ", " << rp->y << ")" << endl;
+					}
+					(*cycleStrings.at(i)) << ")" << endl;
 				}
-				(*cycleStrings.at(i)) << ")" << endl;
+				else
+					(*cycleStrings.at(i)) << "Dirty (-)" << endl;
 			}
 			else
 				(*cycleStrings.at(i)) << "Dirty (-)" << endl;
 		}
-		else
-			(*cycleStrings.at(i)) << "Dirty (-)" << endl;
-	}
 
-	// Equalize lengths of vectors
-	for (unsigned i = pinActivations->size(); i < cycleStrings.size()+firstCycle; i++)
-		pinActivations->push_back(new vector<int>());
+		// Equalize lengths of vectors
+		for (unsigned i = pinActivations->size(); i < cycleStrings.size()+firstCycle; i++)
+			pinActivations->push_back(new vector<int>());
 
-	for (unsigned i = 0; i < cycleStrings.size(); i++)
-	{
-		if (pinActivations->at(i+firstCycle)->size() > 0)
+		for (unsigned i = 0; i < cycleStrings.size(); i++)
 		{
-			(*cycleStrings.at(i)) << "ActivePins (";
-			for (unsigned j = 0; j < pinActivations->at(i+firstCycle)->size(); j++)
+			if (pinActivations->at(i+firstCycle)->size() > 0)
 			{
-				(*cycleStrings.at(i)) << pinActivations->at(i+firstCycle)->at(j);
-				if (j < pinActivations->at(i+firstCycle)->size()-1)
-					(*cycleStrings.at(i)) << ", ";
+				(*cycleStrings.at(i)) << "ActivePins (";
+				for (unsigned j = 0; j < pinActivations->at(i+firstCycle)->size(); j++)
+				{
+					(*cycleStrings.at(i)) << pinActivations->at(i+firstCycle)->at(j);
+					if (j < pinActivations->at(i+firstCycle)->size()-1)
+						(*cycleStrings.at(i)) << ", ";
+				}
+				(*cycleStrings.at(i)) << ")" << endl;
 			}
-			(*cycleStrings.at(i)) << ")" << endl;
+			else
+				(*cycleStrings.at(i)) << "ActivePins (-)" << endl;
 		}
-		else
-			(*cycleStrings.at(i)) << "ActivePins (-)" << endl;
+
+		for (unsigned i = firstCycle; i <= lastCycle+1; i++)
+			os << cycleStrings.at(i - firstCycle)->str();
+		//os << cycleStrings.at(i - firstCycle)->str() << "Number of pins to activate = " << pinActivations->at(i)->size() << endl;
+		//os << cycleStrings.at(i - cycle)->str() << "Number of pins to activate = 1" << endl;
+
+		// Cleanup stringstreams
+		while (!cycleStrings.empty())
+		{
+			stringstream *ss = cycleStrings.back();
+			cycleStrings.pop_back();
+			delete ss;
+		}
 	}
-
-	for (unsigned i = firstCycle; i <= lastCycle+1; i++)
-		os << cycleStrings.at(i - firstCycle)->str();
-	//os << cycleStrings.at(i - firstCycle)->str() << "Number of pins to activate = " << pinActivations->at(i)->size() << endl;
-	//os << cycleStrings.at(i - cycle)->str() << "Number of pins to activate = 1" << endl;
-
-	// Cleanup stringstreams
-	while (!cycleStrings.empty())
-	{
-		stringstream *ss = cycleStrings.back();
-		cycleStrings.pop_back();
-		delete ss;
-	}
-
 	os.close();
 }
 
@@ -1100,7 +1113,7 @@ void FileOut::WriteHardwareFileWithWireRoutes(DmfbArch *arch, string fileName, b
 
 
 	// Output wire routing info if it has been generated
-	if (arch->pcb != NULL)
+	if (arch->pcb != NULL && includeWireRouting)
 	{
 		// Print wire routing node offset for array
 		os << "\nARRAYOFFSET (" << arch->wrOffsetX << ", " << arch->wrOffsetY << ")" << endl;

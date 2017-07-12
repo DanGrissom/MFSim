@@ -25,19 +25,12 @@
  * FML		MM/DD/YY	One-line description									*
  *-----------------------------------------------------------------------------*/
 
+#include "../../Headers/Testing/biocode_test.h"
 #include "../../Headers/Testing/demo.h"
 #include "../../Headers/Resources/enums.h"
 #include "../../Headers/synthesis.h"
+#include "../../Headers/Models/compiled_cfg.h"
 #include "../../Headers/Models/cfg.h"
-
-///////////////////////////////////////////////////////////////////////////
-// An empty method for you (me, who?) to write your own code in a clean,
-// contained method for trying out specific cases.
-///////////////////////////////////////////////////////////////////////////
-void Demo::MySandboxCode()
-{
-
-}
 
 ///////////////////////////////////////////////////////////////////////////
 // This method provides a demo of the Field-programmable, pin-constrained DMFB,
@@ -172,44 +165,44 @@ void Demo::ProgrammableDMFB(bool isParallel, bool useVirtualTopology, PinMapType
 	// Schedule the requested benchmark... (notice the use of Path Scheduler (PATH_S) for the protein assays)
 	switch (benchmark)
 	{
-		case PCR_BM:
-			Synthesis::Schedule("Assays/B1/MixSplit/PCR.txt", "DmfbArchs/IndividuallyAddressable/B1/Arch_15_19_B1.txt", "Output/1_SCHED_to_PLACE.txt", LIST_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
-			break;
-		case IN_VITRO_1_BM:
-			Synthesis::Schedule("Assays/B2/InVitro_Ex1_2s_2r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", "Output/1_SCHED_to_PLACE.txt", LIST_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
-			break;
-		case IN_VITRO_2_BM:
-			Synthesis::Schedule("Assays/B2/InVitro_Ex2_2s_3r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", "Output/1_SCHED_to_PLACE.txt", LIST_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
-			break;
-		case IN_VITRO_3_BM:
-			Synthesis::Schedule("Assays/B2/InVitro_Ex3_3s_3r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", "Output/1_SCHED_to_PLACE.txt", LIST_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
-			break;
-		case IN_VITRO_4_BM:
-			Synthesis::Schedule("Assays/B2/InVitro_Ex4_3s_4r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", "Output/1_SCHED_to_PLACE.txt", LIST_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
-			break;
-		case IN_VITRO_5_BM:
-			Synthesis::Schedule("Assays/B2/InVitro_Ex5_4s_4r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", "Output/1_SCHED_to_PLACE.txt", LIST_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
-			break;
-		case PROTEIN_SPLIT_1_BM:
-			Synthesis::Schedule("Assays/B4/MixSplit/ProteinSplit_01_Eq.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", "Output/1_SCHED_to_PLACE.txt", PATH_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
-			break;
-		case PROTEIN_SPLIT_3_BM:
-			Synthesis::Schedule("Assays/B4/MixSplit/ProteinSplit_03_Eq.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", "Output/1_SCHED_to_PLACE.txt", PATH_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
-			break;
-		case PROTEIN_SPLIT_5_BM:
-			Synthesis::Schedule("Assays/B4/MixSplit/ProteinSplit_05_Eq.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", "Output/1_SCHED_to_PLACE.txt", PATH_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
-			break;
-		case PROTEIN_BM:
-			Synthesis::Schedule("Assays/B3/MixSplit/Protein.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", "Output/1_SCHED_to_PLACE.txt", PATH_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
-			break;
-		default:
-			claim(false, "Unknown benchmark not currently implemented into the IndividuallyAddressableDMFB() demo.");
-			return;
+	case PCR_BM:
+		Synthesis::Schedule("Assays/B1/MixSplit/PCR.txt", "DmfbArchs/IndividuallyAddressable/B1/Arch_15_19_B1.txt", "Output/1_SCHED_to_PLACE.txt", LIST_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
+		break;
+	case IN_VITRO_1_BM:
+		Synthesis::Schedule("Assays/B2/InVitro_Ex1_2s_2r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", "Output/1_SCHED_to_PLACE.txt", LIST_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
+		break;
+	case IN_VITRO_2_BM:
+		Synthesis::Schedule("Assays/B2/InVitro_Ex2_2s_3r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", "Output/1_SCHED_to_PLACE.txt", LIST_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
+		break;
+	case IN_VITRO_3_BM:
+		Synthesis::Schedule("Assays/B2/InVitro_Ex3_3s_3r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", "Output/1_SCHED_to_PLACE.txt", LIST_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
+		break;
+	case IN_VITRO_4_BM:
+		Synthesis::Schedule("Assays/B2/InVitro_Ex4_3s_4r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", "Output/1_SCHED_to_PLACE.txt", LIST_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
+		break;
+	case IN_VITRO_5_BM:
+		Synthesis::Schedule("Assays/B2/InVitro_Ex5_4s_4r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", "Output/1_SCHED_to_PLACE.txt", LIST_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
+		break;
+	case PROTEIN_SPLIT_1_BM:
+		Synthesis::Schedule("Assays/B4/MixSplit/ProteinSplit_01_Eq.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", "Output/1_SCHED_to_PLACE.txt", PATH_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
+		break;
+	case PROTEIN_SPLIT_3_BM:
+		Synthesis::Schedule("Assays/B4/MixSplit/ProteinSplit_03_Eq.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", "Output/1_SCHED_to_PLACE.txt", PATH_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
+		break;
+	case PROTEIN_SPLIT_5_BM:
+		Synthesis::Schedule("Assays/B4/MixSplit/ProteinSplit_05_Eq.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", "Output/1_SCHED_to_PLACE.txt", PATH_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
+		break;
+	case PROTEIN_BM:
+		Synthesis::Schedule("Assays/B3/MixSplit/Protein.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", "Output/1_SCHED_to_PLACE.txt", PATH_S, GRISSOM_FIX_0_RA, pmType, maxDropsPerStorageMod);
+		break;
+	default:
+		claim(false, "Unknown benchmark not currently implemented into the IndividuallyAddressableDMFB() demo.");
+		return;
 	}
 
 	// ...place, droplet route and wire-route the scheduled assay
 	Synthesis::Place("Output/1_SCHED_to_PLACE.txt", "Output/2_PLACE_to_ROUTE.txt", placerType, minCellsBetweenIrMods);
-	Synthesis::Route("Output/2_PLACE_to_ROUTE.txt", ROY_MAZE_R, false, compactionType, peType, SIM_EX);
+	Synthesis::Route("Output/2_PLACE_to_ROUTE.txt", ROY_MAZE_R, false, compactionType, peType, ALL_EX);
 	if (performWireRouting)
 		Synthesis::WireRoute("Output/3_ROUTE_to_SIM.txt", PATH_FINDER_WR, numHorizTracks, numVertTracks);
 }
@@ -320,12 +313,12 @@ void Demo::WireRoutingCase(int oCap, int testNum)
 	else if (testNum == 15)
 	{
 		CopyArchFile("DmfbArchs/FPPC/Enhanced_TCAD/WireRoutingTesting/EnhancedFPPC_RouteOpt_4.txt");
-		Synthesis::WireRoute(inFileName, PATH_FINDER_WR, oCap, oCap);
+		Synthesis::WireRoute(inFileName, ENHANCED_FPPC_WR, oCap, oCap);
 	}
 	else if (testNum == 16)
 	{
 		CopyArchFile("DmfbArchs/FPPC/Enhanced_TCAD/WireRoutingTesting/EnhancedFPPC_RouteOpt_8.txt");
-		Synthesis::WireRoute(inFileName, PATH_FINDER_WR, oCap, oCap);
+		Synthesis::WireRoute(inFileName, ENHANCED_FPPC_WR, oCap, oCap);
 	}
 	else if (testNum == 17)
 	{
@@ -415,6 +408,112 @@ void Demo::PinMapWireRouteFlow(PinMapType pmt, WireRouteType wrt, int oCap, int 
 	Synthesis::Place("Output/1_SCHED_to_PLACE.txt", "Output/2_PLACE_to_ROUTE.txt", pt, minCellsBetweenIrMods);
 	Synthesis::Route("Output/2_PLACE_to_ROUTE.txt", ROY_MAZE_R, false, BEG_COMP, pet, SIM_EX);
 	Synthesis::WireRoute("Output/3_ROUTE_to_SIM.txt", wrt, oCap, oCap); // Call wire-routing here if you'd like
+}
+
+///////////////////////////////////////////////////////////////////////////
+// This method creates (by calling methods below) and executes one of the
+// several hardcoded CFGs (non-biocoder and non-language). The CFG is
+// compiled before execution.
+///////////////////////////////////////////////////////////////////////////
+void Demo::Create_Compile_Execute_Hardcoded_CFG(int testNum)
+{
+	// Create synthesis engine with pre-set DMFB architecture and configurations
+	Synthesis *synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/Testing/Arch_15_19_SampleReagent.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
+
+	// Create and initialize a CFG
+	CFG *cfg = NULL;
+	if (testNum == 1)
+		cfg = Demo::Create_Conditional_Demo_CFG();
+	else if (testNum == 2)
+		cfg = Demo::Create_FaultTolerant_Split_Demo1_CFG();
+	else if (testNum == 3)
+		cfg = Demo::Create_FaultTolerant_Split_Demo2_CFG();
+	else
+		claim(false, "Unknown test-case number for Create_Compile_Execute_Hardcoded_CFG() demo.");
+
+	// Output the graph
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
+
+	// Compile and execute the CFG
+	CompiledCFG *compiledCFG = new CompiledCFG(synthesisEngine, cfg);
+	compiledCFG->execute();
+	compiledCFG->outputSimulationFiles();
+
+	// Cleanup
+	delete compiledCFG;
+	delete cfg;
+}
+
+////////////////////////////////////////////////////////////////////////
+// This method creates (by calling biocoder methods) and executes one of the
+// several Biocoder CFGs. The CFG is compiled before execution.
+///////////////////////////////////////////////////////////////////////////
+void Demo::Create_Compile_Execute_Biocoder_CFG(int testNum)
+{
+	// Create CFG/Synthesis variables
+	Synthesis *synthesisEngine = NULL;
+	CFG *cfg = NULL;
+
+	// Create CFG; create synthesis engine with pre-set DMFB architecture and configurations
+	if (testNum == 1)
+	{
+		synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/Testing/Arch_15_19_SampleReagent.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
+		cfg = BiocodeTest::Create_Conditional_Demo_CFG(false);										// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
+	}
+	else if (testNum == 2)
+	{
+		synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/Testing/Arch_15_19_SampleReagent.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
+		cfg = BiocodeTest::Create_Simple_Conditional_With_Transfer_Droplets_Demo_CFG(false);			// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
+	}
+	else if (testNum == 3)
+	{
+		synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/Testing/Arch_15_19_SampleReagent.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
+		cfg = BiocodeTest::Create_Compound_Conditional_With_Transfer_Droplets_Demo_CFG(false);		// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
+	}
+	else if (testNum == 4)
+	{
+		synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/Testing/Arch_15_19_SampleReagent.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
+		cfg = BiocodeTest::Create_Conditional_Runcount_With_Transfer_Droplets_Demo_CFG(false);			// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
+	}
+	else if (testNum == 5)
+	{
+		synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/Testing/Arch_15_19_SampleReagent.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
+		cfg = BiocodeTest::Create_Conditional_With_Transfer_Droplets_Demo_CFG(false);				// LS Pass; LEB Pass; RMR-R Pass (Merge case); Complete; File I/O Pass	 	//*Good Example
+	}
+	else if (testNum == 6)
+	{
+		synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/Testing/Arch_15_19_SampleReagent.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
+		cfg = BiocodeTest::Create_Conditional_PCR_Droplet_Replacement_CFG(.8, false);					// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
+	}
+	else if (testNum == 7)
+	{
+		synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/Testing/Arch_15_19_SampleReagent.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
+		cfg = BiocodeTest::Create_Conditional_Probabilistic_PCR_CFG(.8, false);						// LS Pass; LEB Pass; RMR-R Pass; File I/O Pass
+	}
+	else if (testNum == 8)
+	{
+		synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
+		cfg = BiocodeTest::Create_Conditional_B2_InVitroDiag_CFG(4, 4, "none", 1, 1, 1, false);		// LS Pass; LEB Pass; RMR-R Pass
+	}
+	else if (testNum == 9)
+	{
+		synthesisEngine = Synthesis::CreateNewSynthesisEngine("DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
+		cfg = BiocodeTest::Create_Conditional_B3_Protein_FaultTolerant_CFG(1, 1, 1, false);			// LS Pass; LEB Pass; RMR-R Pass (Merge cases)
+	}
+	else
+		claim(false, "Unknown test-case number for Create_Compile_Execute_Biocoder_CFG() demo.");
+
+	// Output the graph
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
+
+	// Compile and execute the CFG
+	CompiledCFG *compiledCFG = new CompiledCFG(synthesisEngine, cfg);
+	compiledCFG->execute();
+	compiledCFG->outputSimulationFiles();
+
+	// Cleanup
+	delete compiledCFG;
+	delete cfg;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -588,4 +687,65 @@ CFG * Demo::Create_FaultTolerant_Split_Demo2_CFG()
 	cfg->OutputGraphFile(cfg->getName(), true, true, true);
 	cout << "Fault-tolerant Split Test 2 CFG Generated" << endl;
 	return cfg;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// This method provides a demo of the routing-based synthesis and the
+// improvements which are explained in detail in the following publication:
+//
+// S. Windh, C. Phung, D. Grissom, P. Pop, and P. Brisk
+// Performance Improvements and Congestion Reduction for Routing-based Synthesis for Digital Microfluidic Biochips
+// IEEE Transactions on Computer-Aided Design (TCAD) of Integrated Circuits and Systems
+// Vol. 36, No. 1, January, 2017, pp. 41-54
+///////////////////////////////////////////////////////////////////////////
+
+void Demo::RoutingBasedSynthesis(bool performWash, CommonBenchmarkType benchmark)
+{
+	////////////////////////////////////////////////////////////////////////////
+	// Synthesis Variables
+	////////////////////////////////////////////////////////////////////////////
+	int maxDropsPerStorageMod = 2;
+	int minCellsBetweenIrMods = 1;
+	int numHorizTracks = 3;
+	int numVertTracks = 3;
+
+	////////////////////////////////////////////////////////////////////////////
+	// Entire Routing-based synthesis Flow Tests
+	////////////////////////////////////////////////////////////////////////////
+	switch (benchmark)
+	{
+	case PCR_BM:
+		Synthesis::EntireFlow("Assays/B1/MixSplit/PCR.txt", "DmfbArchs/IndividuallyAddressable/B1/Arch_15_19_B1.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
+		break;
+	case IN_VITRO_1_BM:
+		Synthesis::EntireFlow("Assays/B2/InVitro_Ex1_2s_2r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
+		break;
+	case IN_VITRO_2_BM:
+		Synthesis::EntireFlow("Assays/B2/InVitro_Ex2_2s_3r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
+		break;
+	case IN_VITRO_3_BM:
+		Synthesis::EntireFlow("Assays/B2/InVitro_Ex3_3s_3r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
+		break;
+	case IN_VITRO_4_BM:
+		Synthesis::EntireFlow("Assays/B2/InVitro_Ex4_3s_4r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
+		break;
+	case IN_VITRO_5_BM:
+		Synthesis::EntireFlow("Assays/B2/InVitro_Ex5_4s_4r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
+		break;
+	case PROTEIN_SPLIT_1_BM:
+		Synthesis::EntireFlow("Assays/B4/MixSplit/ProteinSplit_01_Eq.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
+		break;
+	case PROTEIN_SPLIT_2_BM:
+		Synthesis::EntireFlow("Assays/B4/MixSplit/ProteinSplit_02_Eq.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
+		break;
+	case PROTEIN_SPLIT_3_BM:
+		Synthesis::EntireFlow("Assays/B4/MixSplit/ProteinSplit_03_Eq.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
+		break;
+	case PROTEIN_BM:
+		Synthesis::EntireFlow("Assays/B3/MixSplit/Protein.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
+		break;
+	default:
+		claim(false, "Unknown benchmark not currently implemented into the FieldProgrammablePinConstrainedDMFB() demo.");
+		return;
+	}
 }

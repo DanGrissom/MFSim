@@ -43,9 +43,7 @@ import javax.swing.ImageIcon;
 //import com.sun.j3d.utils.applet.MainFrame;
 
 import dmfbSimVisualizer.parsers.*;
-import dmfbSimVisualizer.views.ImagePanel;
-import dmfbSimVisualizer.views.Main;
-//import dmfbSimVisualizer.views.Placed3dViewerApp;
+import dmfbSimVisualizer.views.*;
 
 public class OutputThread extends Thread {
 	Main m;

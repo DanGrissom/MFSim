@@ -1,0 +1,6 @@
+DagName (DAG2)
+NODE (4, TRANSFER_IN, PCRMix)
+EDGE (4, 5)
+
+NODE (5, TRANSFER_OUT, PCRMix)
+

@@ -40,6 +40,9 @@ class Test
 		Test();
         virtual ~Test ();
 
+        // Sandbox method for trying new implementations
+        static void MySandboxCode();
+
         // Benchmarks from http://people.ee.duke.edu/~fs/Benchmark.pdf
         static DAG *Create_B1_PCRMix(double mult, int repeat);
         static DAG *Create_B2_InVitroDiag_1(double mult, int repeat);
@@ -69,11 +72,10 @@ class Test
         static void ZachVlsiJournal2014Experiments();
         static void ZachPlaceAndRoute();
         static void JETC2014_Tests();
-
-        // Calvin & Skyler's Routing Based Synthesis Tests
-        static void RoutingBasedSynthesis(bool performWash, CommonBenchmarkType benchmark);
+        static void BrokenCFGsForBrett(int testNum);
 
         // General
         static void MainSandboxCode();
+        static void CFGFileIOTest();
 };
 #endif

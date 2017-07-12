@@ -202,11 +202,33 @@ void RoyMazeRouter::computeIndivSupProbRoutes(vector<vector<RoutePoint *> *> *su
 				{
 					AssayNode *par = n->GetParents().front(); // Only 1 parent
 					Droplet *pd = par->GetDroplets().back();
-					RoutePoint *lastRp = (*routes)[pd]->back();
-					lastRp->dStatus = DROP_TRANSFER_OUT;
-					par->droplets.pop_back();
-					n->addDroplet(pd);
-					n->SetTransferRef(lastRp);
+
+//					RoutePoint *lastRp = (*routes)[pd]->back();
+//					lastRp->dStatus = DROP_TRANSFER_OUT;
+//					par->droplets.pop_back();
+//					n->addDroplet(pd);
+//					n->SetTransferRef(lastRp);
+
+					//DTG-PLDI
+					if (par->GetType() == TRANSFER_IN)
+					{
+						////par->droplets.pop_back();
+						n->addDroplet(pd);
+						cout << "Do I need to do this???";
+						//routableThisTS.push_back(n);
+					}
+					else
+					{
+						RoutePoint *lastRp = (*routes)[pd]->back();
+						lastRp->dStatus = DROP_TRANSFER_OUT;
+						par->droplets.pop_back();
+						n->addDroplet(pd);
+						n->SetTransferRef(lastRp);
+					}
+
+
+
+
 				}
 				else // This is routing-DAG, so this TRANSFER_OUT will have a TRANSFER_IN parent (and not be coming from a local module...so route now)
 					routableThisTS.push_back(n);
