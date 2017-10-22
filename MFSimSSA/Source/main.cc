@@ -68,10 +68,10 @@ int main(int argc, char **argv)
 
 			//Demo::FieldProgrammablePinConstrainedDMFB(true, true, true, PROTEIN_SPLIT_1_BM);
 			//Test::RoutingBasedSynthesis(true, PROTEIN_BM);
-			//Demo::IndividuallyAddressableDMFB(true, true, false, PCR_BM);
+			Demo::IndividuallyAddressableDMFB(true, true, false, PCR_BM);
 			//Demo::CliquePartitionedDMFB(true, false, false, PCR_BM);
 			//for (int i = 1; i <= 19; i++)
-				Demo::WireRoutingCase(3, 3);
+				//Demo::WireRoutingCase(3, 3);
 			//Demo::PinMapWireRouteFlow(SWITCH_PM, PIN_MAPPER_INHERENT_WR, 3, 10);
 			//Demo::PinMapWireRouteFlow(CLIQUE_PM, PATH_FINDER_WR, 3, 10);
 			//Demo::MySandboxCode();

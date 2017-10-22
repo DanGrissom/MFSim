@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------*
- *                       (c)2016, All Rights Reserved.     						*
+ *                       (c)2014, All Rights Reserved.     						*
  *       ___           ___           ___     									*
  *      /__/\         /  /\         /  /\    									*
  *      \  \:\       /  /:/        /  /::\   									*
@@ -40,7 +40,6 @@ import dmfbSimVisualizer.common.*;
 public class PlacedParser {
 	private Map<Integer, ArrayList<String>> NodesAtMod;
 	private ArrayList<AssayNode> IoNodes;
-	private ArrayList<AssayNode> TransferNodes;
 	private ArrayList<FixedArea> ExternalResources;
 	private ArrayList<FixedArea> ResourceLocations;
 	private ArrayList<ReconfigArea> ReconfigAreas;
@@ -55,7 +54,6 @@ public class PlacedParser {
 	{
 		NodesAtMod = new HashMap<Integer, ArrayList<String>>();
 		IoNodes = new ArrayList<AssayNode>();
-		TransferNodes = new ArrayList<AssayNode>();
 		ExternalResources = new ArrayList<FixedArea>();
 		ResourceLocations = new ArrayList<FixedArea>();
 		ReconfigAreas = new ArrayList<ReconfigArea>();
@@ -183,25 +181,10 @@ public class PlacedParser {
 						ra.opType = OperationType.HEAT;
 						ra.name = "H" + String.valueOf(ra.id);
 					}
-					else if (tokens[1].toUpperCase().equals("COOL"))
-					{
-						ra.opType = OperationType.COOL;
-						ra.name = "C" + String.valueOf(ra.id);
-					}
 					else if (tokens[1].toUpperCase().equals("DETECT"))
 					{
 						ra.opType = OperationType.DETECT;
 						ra.name = "Det" + String.valueOf(ra.id);
-					}
-					else if (tokens[1].toUpperCase().equals("TRANSFER_IN"))
-					{
-						ra.opType = OperationType.TRANSFER_IN;
-						ra.name = "TI" + String.valueOf(ra.id);
-					}
-					else if (tokens[1].toUpperCase().equals("TRANSFER_OUT"))
-					{
-						ra.opType = OperationType.TRANSFER_OUT;
-						ra.name = "TO" + String.valueOf(ra.id);
 					}
 					else if (tokens[1].toUpperCase().equals("STORAGE") || tokens[1].toUpperCase().equals("STORAGE_HOLDER"))
 					{
@@ -265,8 +248,6 @@ public class PlacedParser {
 						descrip += "SPLT_" + tokens[0];
 					else if (type.equals("HEAT"))
 						descrip += "HEAT_" + tokens[0];
-					else if (type.equals("COOL"))
-						descrip += "COOL_" + tokens[0];
 					else if (type.equals("DETECT"))
 						descrip += "DET_" + tokens[0];
 					else if (type.equals("STORAGE"))
@@ -276,11 +257,13 @@ public class PlacedParser {
 
 					if (!tokens[4].isEmpty() && (type.equals("MIX") || type.equals("DILUTE") || type.equals("SPLIT") || type.equals("DETECT")))
 						descrip += ("\n(" + tokens[4] + ")");					
-					else if (!tokens[3].isEmpty() && (type.equals("HEAT") || type.equals("COOL")))
+					else if (!tokens[3].isEmpty() && type.equals("HEAT"))
 						descrip += ("\n(" + tokens[3] + ")");
 					else if (!tokens[2].isEmpty() && (type.equals("STORAGE") || type.equals("GENERAL")))
 						descrip += ("\n(" + tokens[2] + ")");
 
+					// Add the node description to the appropriate module
+					int locId = Integer.parseInt(tokens[tokens.length-1]);
 					if (type.equals("DISPENSE") || type.equals("OUTPUT"))
 					{
 						AssayNode n = new AssayNode();
@@ -304,20 +287,8 @@ public class PlacedParser {
 						}
 						IoNodes.add(n);
 					}
-					else if (type.equals("TRANSFER_IN") || type.equals("TRANSFER_OUT"))
-					{
-						AssayNode n = new AssayNode();
-						n.type = type.equals("TRANSFER_IN") ? OperationType.TRANSFER_IN : OperationType.TRANSFER_OUT;
-						n.id = Integer.parseInt(tokens[0]);
-						n.name = tokens[2];
-						n.startTS = Integer.parseInt(tokens[3]);
-						n.stopTS = Integer.parseInt(tokens[4]);
-						TransferNodes.add(n);
-					}
 					else
-					{			
-						// Add the node description to the appropriate module
-						int locId = Integer.parseInt(tokens[tokens.length-1]);
+					{									
 						ArrayList<String> al = NodesAtMod.get(locId);
 						if (al == null)
 						{
@@ -381,8 +352,5 @@ public class PlacedParser {
 	}
 	public ArrayList<AssayNode> getIoNodes() {
 		return IoNodes;
-	}
-	public ArrayList<AssayNode> getTransferNodes() {
-		return TransferNodes;
 	}
 }

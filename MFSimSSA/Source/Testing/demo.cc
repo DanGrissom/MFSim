@@ -209,7 +209,7 @@ void Demo::ProgrammableDMFB(bool isParallel, bool useVirtualTopology, PinMapType
 
 	// ...place, droplet route and wire-route the scheduled assay
 	Synthesis::Place("Output/1_SCHED_to_PLACE.txt", "Output/2_PLACE_to_ROUTE.txt", placerType, minCellsBetweenIrMods);
-	Synthesis::Route("Output/2_PLACE_to_ROUTE.txt", ROY_MAZE_R, false, compactionType, peType, SIM_EX);
+	Synthesis::Route("Output/2_PLACE_to_ROUTE.txt", ROY_MAZE_R, false, compactionType, peType, ALL_EX);
 	if (performWireRouting)
 		Synthesis::WireRoute("Output/3_ROUTE_to_SIM.txt", PATH_FINDER_WR, numHorizTracks, numVertTracks);
 }

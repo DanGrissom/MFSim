@@ -20,5 +20,4 @@ public class DrawOptions {
 	public String outputRangeType;
 	public int minOutputRange;
 	public int maxOutputRange;
-	public int currentLayer;
 }
