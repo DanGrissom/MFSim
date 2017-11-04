@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------*
- *                       (c)2014, All Rights Reserved.     						*
+ *                       (c)2016, All Rights Reserved.     						*
  *       ___           ___           ___     									*
  *      /__/\         /  /\         /  /\    									*
  *      \  \:\       /  /:/        /  /::\   									*
@@ -45,6 +45,7 @@ public class CompactRouteParser {
 	private ArrayList<FixedArea> ExternalResources;
 	private ArrayList<FixedArea> ResourceLocations;
 	private ArrayList<ReconfigArea> ReconfigAreas;
+	private ArrayList<AssayNode> TransferNodes;
 	private ArrayList<AssayNode> IoNodes;
 	private ArrayList<IoPort> IoPorts;
 	private int numXcells;
@@ -61,6 +62,7 @@ public class CompactRouteParser {
 		ExternalResources = new ArrayList<FixedArea>();
 		ResourceLocations = new ArrayList<FixedArea>();
 		ReconfigAreas = new ArrayList<ReconfigArea>();
+		TransferNodes = new ArrayList<AssayNode>();
 		IoNodes = new ArrayList<AssayNode>();
 		IoPorts = new ArrayList<IoPort>();
 		numXcells = 0;
@@ -260,6 +262,8 @@ public class CompactRouteParser {
 								descrip += "SPLT_" + tokens[0];
 							else if (type.equals("HEAT"))
 								descrip += "HEAT_" + tokens[0];
+							else if (type.equals("COOL"))
+								descrip += "COOL_" + tokens[0];
 							else if (type.equals("DETECT"))
 								descrip += "DET_" + tokens[0];
 							else if (type.equals("STORAGE"))
@@ -269,7 +273,7 @@ public class CompactRouteParser {
 
 							if (!tokens[4].isEmpty() && (type.equals("MIX") || type.equals("DILUTE") || type.equals("SPLIT") || type.equals("DETECT")))
 								descrip += (" (" + tokens[4] + ")");					
-							else if (!tokens[3].isEmpty() && type.equals("HEAT"))
+							else if (!tokens[3].isEmpty() && (type.equals("HEAT") || type.equals("COOL")))
 								descrip += (" (" + tokens[3] + ")");
 							else if (!tokens[2].isEmpty() && (type.equals("STORAGE") || type.equals("GENERAL")))
 								descrip += (" (" + tokens[2] + ")");
@@ -298,6 +302,16 @@ public class CompactRouteParser {
 									n.boundResourceId = Integer.parseInt(tokens[6]);
 								}
 								IoNodes.add(n);
+							}
+							else if (type.equals("TRANSFER_IN") || type.equals("TRANSFER_OUT"))
+							{
+								AssayNode n = new AssayNode();
+								n.type = type.equals("TRANSFER_IN") ? OperationType.TRANSFER_IN : OperationType.TRANSFER_OUT;
+								n.id = Integer.parseInt(tokens[0]);
+								n.name = tokens[2];
+								n.startTS = Integer.parseInt(tokens[3]);
+								n.stopTS = Integer.parseInt(tokens[4]);
+								TransferNodes.add(n);
 							}
 							else
 							{									
@@ -398,5 +412,8 @@ public class CompactRouteParser {
 	}
 	public ArrayList<AssayNode> getIoNodes() {
 		return IoNodes;
+	}
+	public ArrayList<AssayNode> getTransferNodes() {
+		return TransferNodes;
 	}
 }

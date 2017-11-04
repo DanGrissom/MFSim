@@ -45,18 +45,21 @@ class Demo
 
         // General
         static void FieldProgrammablePinConstrainedDMFB(bool isParallel, bool performWash, bool useFPPCWireRouter, CommonBenchmarkType benchmark);
+        static void RoutingBasedSynthesis(bool performWash, CommonBenchmarkType benchmark);
         static void ProgrammableDMFB(bool isParallel, bool useVirtualTopology, PinMapType pmType, bool performWireRouting, CommonBenchmarkType benchmark);
         static void IndividuallyAddressableDMFB(bool isParallel, bool useVirtualTopology, bool performWireRouting, CommonBenchmarkType benchmark);
         static void CliquePartitionedDMFB(bool isParallel, bool useVirtualTopology, bool performWireRouting, CommonBenchmarkType benchmark);
         static void WireRoutingCase(int orthogonalCapacity, int testNum);
         static void PinMapWireRouteFlow(PinMapType pmt, WireRouteType wrt, int oCap, int testNum);
         static void CopyArchFile(string fileName);
-        static void MySandboxCode();
 
         // Conditional Demos
         static CFG * Create_Conditional_Demo_CFG();
         static CFG * Create_FaultTolerant_Split_Demo1_CFG();
         static CFG * Create_FaultTolerant_Split_Demo2_CFG();
+
+        static void Create_Compile_Execute_Hardcoded_CFG(int testNum);
+        static void Create_Compile_Execute_Biocoder_CFG(int testNum);
 };
 
 #endif /* _DEMO_H */

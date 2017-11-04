@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------*
- *                       (c)2014, All Rights Reserved.     						*
+ *                       (c)2016, All Rights Reserved.     						*
  *       ___           ___           ___     									*
  *      /__/\         /  /\         /  /\    									*
  *      \  \:\       /  /:/        /  /::\   									*
@@ -35,15 +35,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import javax.swing.ImageIcon;
 
-import com.sun.j3d.utils.applet.MainFrame;
+//import com.sun.j3d.utils.applet.MainFrame;
 
 import dmfbSimVisualizer.parsers.*;
-import dmfbSimVisualizer.views.ImagePanel;
-import dmfbSimVisualizer.views.Main;
-import dmfbSimVisualizer.views.Placed3dViewerApp;
+import dmfbSimVisualizer.views.*;
 
 public class OutputThread extends Thread {
 	Main m;
@@ -59,9 +59,9 @@ public class OutputThread extends Thread {
 		super(name);
 		m = main;
 		drawOptions = dOpts;	
-		
+
 	}
-	
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// This is the method that is executed when the thread is started.
 	// This will figure out which simulation type you selected in the GUI and call the
@@ -70,7 +70,7 @@ public class OutputThread extends Thread {
 	public void run()
 	{
 		String inFile = drawOptions.inFile;
-		
+
 		// Parse file name
 		String fileName;
 		if (inFile.lastIndexOf('\\') > 0)
@@ -79,54 +79,118 @@ public class OutputThread extends Thread {
 			fileName = inFile.substring(inFile.lastIndexOf('/'));
 		else
 			fileName = inFile;
-		
+
 		//Delete all the old simulation images/files				
 		m.updateProgress(0, "Deleting old simulation files...");
 		File dir = new File(outDir);
-	    String[] list = dir.list();
-	    for (int i = 0; i < list.length; i++)
-	    {
-	      File file = new File(outDir, list[i]);
-	      file.delete();
-	    }	   				
+		String[] list = dir.list();
+		if(list != null)
+		{
+			for (int i = 0; i < list.length; i++)
+			{
+				File file = new File(outDir, list[i]);
+				file.delete();
+			}
+		}
 
-		 //Copy input file into simulation directory for reference
-	    try {
-	    	m.updateProgress(0, "Copying Interface File To Output Directory...");
-		    File inputFile = new File(inFile);
-		    File outputFile = new File(outDir + "/" + fileName);
-		    FileReader in;					
-			in = new FileReader(inputFile);
-			
-		    FileWriter out = new FileWriter(outputFile);
-		    int c;
-		    while ((c = in.read()) != -1)
-		      out.write(c);
-		    in.close();
-		    out.close();
-		} catch (IOException e1) { MFError.DisplayError(e1.getMessage());}
-	    
-	    // Run the proper parser and visualizer
-	    if (drawOptions.simType == "Hardware Description")
-	    {
+		//Copy input file into simulation directory for reference if only working with one file
+		if (drawOptions.simType != "All Graphs")
+		{
+			try {
+				m.updateProgress(0, "Copying Interface File To Output Directory...");
+				File inputFile = new File(inFile);
+				File outputFile = new File(outDir + "/" + fileName);
+				FileReader in;					
+				in = new FileReader(inputFile);
+
+				FileWriter out = new FileWriter(outputFile);
+				int c;
+				while ((c = in.read()) != -1)
+					out.write(c);
+				in.close();
+				out.close();
+			} catch (IOException e1) { MFError.DisplayError(e1.getMessage());}
+		}
+		// Run the proper parser and visualizer
+		if (drawOptions.simType == "Hardware Description")
+		{
 			try {
 				m.updateProgress(0, "Parsing Interface File...");
 				HardwareParser hp = new HardwareParser(inFile);
-	    		DmfbDrawer.DrawHardware(hp, drawOptions, m);
-			    m.setOutputting(false);
+				DmfbDrawer.DrawHardware(hp, drawOptions, m);
+				m.setOutputting(false);
 			} catch (IOException e1) { MFError.DisplayError(e1.getMessage());}
-	    }
-	    else if (drawOptions.simType == "Unscheduled DAG")
+		}
+		else if (drawOptions.simType == "All Graphs")
+		{
+
+			m.updateProgress(0, "Outputting Graphs");
+			String inDir = inFile;
+			File dotDir = new File(inDir);
+			File[] files = dotDir.listFiles();
+
+			int numDotFiles = 0;
+			for (int i = 0; i < files.length; i++)
+				if (files[i].getName().endsWith(".dot"))
+					numDotFiles++;
+
+			if (numDotFiles > 0)
+			{
+				int numOutput = 0;
+				for (int i = 0; i < files.length; i++)
+				{
+					if (files[i].getName().endsWith(".dot"))
+					{
+						String inputName = files[i].getName();
+						String outputName = inputName;
+						if (inputName.lastIndexOf(".") > 0)
+							outputName = inputName.substring(0, inputName.lastIndexOf("."));
+
+						Runtime rt = Runtime.getRuntime();
+						Process p;
+						try {
+							p = rt.exec("../Shared/Graphviz/bin/dot.exe -T" + imgExt + " \"" + files[i].getPath() + "\" -o \"" + outDir + "/" + outputName + "." + imgExt + "\"");
+							p.waitFor();
+							numOutput++;
+							m.updateProgress((numOutput*100) / numDotFiles, "Outputting Graph " + numOutput + "/" + numDotFiles);						
+						} 
+						catch (IOException e) {MFError.DisplayError(e.getMessage());}      
+						catch (InterruptedException e1) { MFError.DisplayError(e1.getMessage());}
+					}
+
+					if (!m.isOutputting())
+					{
+						m.updateProgress((numOutput*100) / numDotFiles, numOutput + "/" + numDotFiles);
+						return;
+					}
+				}
+			}
+			else
+				m.updateProgress(100, "No Graph Files In Directory");
+
+			//			m.updateProgress(0, "Outputting DAG");
+			//			Runtime rt = Runtime.getRuntime();
+			//			Process p;
+			//			try {
+			//				p = rt.exec("../Shared/Graphviz/bin/dot.exe -T" + imgExt + " " + inFile + " -o " + outDir + "/" + name + "." + imgExt);
+			//				p.waitFor();
+			//				m.updateProgress(100, "DAG Output");
+			//			} 
+			//			catch (IOException e) {MFError.DisplayError(e.getMessage());}      
+			//			catch (InterruptedException e1) { MFError.DisplayError(e1.getMessage());}
+			m.setOutputting(false);
+		}
+		else if (drawOptions.simType == "Unscheduled DAG")
 		{
 			String name = fileName;
 			if (fileName.lastIndexOf(".") > 0)
 				name = fileName.substring(0, fileName.lastIndexOf("."));
-			
+
 			m.updateProgress(0, "Outputting DAG");
 			Runtime rt = Runtime.getRuntime();
 			Process p;
 			try {
-				p = rt.exec("../Shared/Graphviz/bin/dot.exe -T" + imgExt + " " + inFile + " -o " + outDir + "/" + name + "." + imgExt);
+				p = rt.exec("../Shared/Graphviz/bin/dot.exe -T" + imgExt + " \"" + inFile + "\" -o \"" + outDir + "/" + name + "." + imgExt + "\"");
 				p.waitFor();
 				m.updateProgress(100, "DAG Output");
 			} 
@@ -134,22 +198,22 @@ public class OutputThread extends Thread {
 			catch (InterruptedException e1) { MFError.DisplayError(e1.getMessage());}
 			m.setOutputting(false);
 		}
-	    else if (drawOptions.simType == "Scheduled DAG" || drawOptions.simType == "Placed DAG")
+		else if (drawOptions.simType == "Scheduled DAG" || drawOptions.simType == "Placed DAG")
 		{
 			String name = fileName;
 			if (fileName.lastIndexOf(".") > 0)
 				name = fileName.substring(0, fileName.lastIndexOf("."));
-			
+
 			// Parse and re-write dotty graph file
 			DotGraphParser gp = new DotGraphParser(inFile);
 			name = gp.RewriteDotGraphWithRangeFocus(drawOptions, outDir, name);			
-			
+
 			// Call dotty to draw graph
 			m.updateProgress(0, "Outputting DAG");
 			Runtime rt = Runtime.getRuntime();
 			Process p;
 			try {
-				p = rt.exec("../Shared/Graphviz/bin/dot.exe -T" + imgExt + " " + outDir + "/" + name + ".dot" + " -o " + outDir + "/" + name + "." + imgExt);
+				p = rt.exec("../Shared/Graphviz/bin/dot.exe -T" + imgExt + " \"" + outDir + "/" + name + ".dot\"" + " -o \"" + outDir + "/" + name + "." + imgExt + "\"");
 				p.waitFor();
 				m.updateProgress(100, "DAG Output");
 			} 
@@ -162,11 +226,11 @@ public class OutputThread extends Thread {
 			try {
 				m.updateProgress(0, "Parsing Interface File...");
 				RouteParser p = new RouteParser(inFile, drawOptions, m);
-		    	if (drawOptions.simType == "Cyclic Simulation")
-		    		DmfbDrawer.DrawCycles(p, true, drawOptions, m);
-		    	else
-		    		DmfbDrawer.DrawCycles(p, false, drawOptions, m);
-			    m.setOutputting(false);
+				if (drawOptions.simType == "Cyclic Simulation")
+					DmfbDrawer.DrawCycles(p, true, drawOptions, m);
+				else
+					DmfbDrawer.DrawCycles(p, false, drawOptions, m);
+				m.setOutputting(false);
 			} catch (IOException e1) { MFError.DisplayError(e1.getMessage());}
 
 		}
@@ -175,10 +239,10 @@ public class OutputThread extends Thread {
 			try {
 				m.updateProgress(0, "Parsing Interface File...");
 				CompactRouteParser cp = new CompactRouteParser(inFile);
-		    	DmfbDrawer.DrawAllRoutes(cp, drawOptions, m);
-		    	cp = new CompactRouteParser(inFile); // Just read it in again b/c DrawAllRoutes() deletes some of the info
-		    	DmfbDrawer.DrawAllTimeSteps(null, cp, drawOptions, m);
-		    	m.setOutputting(false);
+				DmfbDrawer.DrawAllRoutes(cp, drawOptions, m);
+				cp = new CompactRouteParser(inFile); // Just read it in again b/c DrawAllRoutes() deletes some of the info
+				DmfbDrawer.DrawAllTimeSteps(null, cp, drawOptions, m);
+				m.setOutputting(false);
 			} catch (IOException e1) { MFError.DisplayError(e1.getMessage());}
 		}
 		else if (drawOptions.simType == "Compact Routes")
@@ -186,22 +250,22 @@ public class OutputThread extends Thread {
 			try {
 				m.updateProgress(0, "Parsing Interface File...");
 				CompactRouteParser cp = new CompactRouteParser(inFile);
-		    	DmfbDrawer.DrawAllRoutes(cp, drawOptions, m);
-		    	m.setOutputting(false);
+				DmfbDrawer.DrawAllRoutes(cp, drawOptions, m);
+				m.setOutputting(false);
 			} catch (IOException e1) { MFError.DisplayError(e1.getMessage());}
 		}
 		else if (drawOptions.simType == "2D Placement")
 		{
-	    	try {
-	    		m.updateProgress(0, "Parsing Interface File...");
-	    		PlacedParser pp = new PlacedParser(inFile);
+			try {
+				m.updateProgress(0, "Parsing Interface File...");
+				PlacedParser pp = new PlacedParser(inFile);
 				DmfbDrawer.DrawAllTimeSteps(pp, null, drawOptions, m);
 				m.setOutputting(false);
 			} catch (IOException e1) { MFError.DisplayError(e1.getMessage());}
 		}
 		else if (drawOptions.simType == "3D Placement")
 		{	    	
-			Frame frame = new MainFrame(new Placed3dViewerApp(inFile), 256, 256);
+			//Frame frame = new MainFrame(new Placed3dViewerApp(inFile), 256, 256);
 		}
 		else
 			MFError.DisplayError("Unknown/unhandled visualization type selected.");

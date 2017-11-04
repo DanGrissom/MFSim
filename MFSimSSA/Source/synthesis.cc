@@ -809,6 +809,18 @@ void Synthesis::WireRoute(string inputFile, WireRouteType wrt, int numHorizTrack
 		wrTime.endTimer();
 		wrTime.printElapsedTime();
 
+		bool includeAreaRoute = false;	// AREA ROUTING AUTOMATICALLY TURNED TO FALSE, SET TO TRUE TO RUN IT
+		if(includeAreaRoute)
+		{
+			ElapsedTimer arTime("Area-Routing Time");
+			arTime.startTimer();
+
+			PCBLayout::calculatePCBLayout(arch);
+
+			arTime.endTimer();
+			arTime.printElapsedTime();
+		}
+
 		printWireRoutingStats(arch);
 
 		/////////////////////////////////////////////////////////

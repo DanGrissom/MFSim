@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------*
- *                       (c)2014, All Rights Reserved.     						*
+ *                       (c)2016, All Rights Reserved.     						*
  *       ___           ___           ___     									*
  *      /__/\         /  /\         /  /\    									*
  *      \  \:\       /  /:/        /  /::\   									*
@@ -70,7 +70,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.JButton;
 
-import com.sun.j3d.utils.applet.MainFrame;
+//import com.sun.j3d.utils.applet.MainFrame;
 import javax.swing.JTextField;
 import javax.swing.JProgressBar;
 import javax.swing.JCheckBox;
@@ -233,7 +233,7 @@ public class Main extends JFrame {
 		JLabel lblVisualizationType = new JLabel("Visualization Type:");
 
 		cbVisType = new JComboBox();
-		cbVisType.setModel(new DefaultComboBoxModel(new String[] {"Hardware Description", "Unscheduled DAG", "Scheduled DAG", "Placed DAG", "Cyclic Simulation", "Cyclic Routes", "Compact Simulation", "Compact Routes", "2D Placement", "3D Placement"}));
+		cbVisType.setModel(new DefaultComboBoxModel(new String[] {"Hardware Description", "All Graphs", "Unscheduled DAG", "Scheduled DAG", "Placed DAG", "Cyclic Simulation", "Cyclic Routes", "Compact Simulation", "Compact Routes", "2D Placement", "3D Placement"}));
 
 		JLabel lblMaxDimensions = new JLabel("Max Dimensions:");
 
@@ -543,6 +543,18 @@ public class Main extends JFrame {
 					cbxWireSegments.setEnabled(true);
 					cbOutputRangeType.setEnabled(false);
 				}
+				else if (cbVisType.getSelectedItem().toString() == "All Graphs")
+				{
+					((ImagePanel)pnlInitViewPreview).updateImage(new ImageIcon(Main.class.getResource("/dmfbSimVisualizer/resources/dagInit.png")));
+					txtInput.setText("Output/");
+					setMovieSettingsEnabled(false);
+					setOutDimsEnabled(false);
+					setModDrawOptionsEnabled(false);
+					setCyclicDrawOptionsEnabled(false);
+					cbxResourceLocations.setEnabled(false);
+					cbxWireSegments.setEnabled(false);
+					cbOutputRangeType.setEnabled(false);
+				}
 				else if (cbVisType.getSelectedItem().toString() == "Unscheduled DAG")
 				{
 					((ImagePanel)pnlInitViewPreview).updateImage(new ImageIcon(Main.class.getResource("/dmfbSimVisualizer/resources/dagInit.png")));
@@ -781,6 +793,8 @@ public class Main extends JFrame {
 				    {
 				    	if (cbVisType.getSelectedItem().toString() == "Hardware Description")
 				    		return "DMFB Hardware Interface Files (*.txt)";
+						else if (cbVisType.getSelectedItem().toString() == "All Graphs")
+							return "All Dotty Graph Files (CFG, DAG, etc.) (*.dot)";
 						else if (cbVisType.getSelectedItem().toString() == "Unscheduled DAG")
 							return "Unscheduled Assay Dotty File (*.dot)";
 						else if (cbVisType.getSelectedItem().toString() == "Scheduled DAG")
@@ -809,6 +823,8 @@ public class Main extends JFrame {
 						
 				    	if (cbVisType.getSelectedItem().toString() == "Hardware Description")
 					        return (filename.endsWith(".txt") || file.isDirectory());
+						else if (cbVisType.getSelectedItem().toString() == "All Graphs")
+							return (filename.endsWith(".dot") || file.isDirectory());
 						else if (cbVisType.getSelectedItem().toString() == "Unscheduled DAG")
 							return (filename.endsWith(".dot") || file.isDirectory());
 						else if (cbVisType.getSelectedItem().toString() == "Scheduled DAG")
@@ -833,7 +849,10 @@ public class Main extends JFrame {
 				}
 				
 				JFileChooser c = new JFileChooser();
-				c.setFileFilter(new DmfbFilter());
+				if (cbVisType.getSelectedItem().toString() != "All Graphs")
+					c.setFileFilter(new DmfbFilter());
+				else
+					c.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				c.setCurrentDirectory(new File ("./Output").getAbsoluteFile());
 
 				int rVal = c.showOpenDialog(Main.this);

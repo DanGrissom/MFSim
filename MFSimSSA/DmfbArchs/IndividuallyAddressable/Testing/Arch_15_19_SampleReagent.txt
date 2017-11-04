@@ -26,6 +26,8 @@ Input (west, 6, 0, Primers)
 Input (west, 8, 0, ReplacementMix)
 Input (west, 10, 0, PCRMasterMix)
 
+Input (west, 12, 0, Blood)
+
 Output (east, 2, 0, output)
 Output (east, 4, 0, waste, true)
 Output (east, 6, 0, save, false)

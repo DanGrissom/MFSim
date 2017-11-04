@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------*
- *                       (c)2014, All Rights Reserved.     						*
+ *                       (c)2016, All Rights Reserved.     						*
  *       ___           ___           ___     									*
  *      /__/\         /  /\         /  /\    									*
  *      \  \:\       /  /:/        /  /::\   									*
@@ -37,6 +37,9 @@ public enum OperationType {
 	DILUTE,
 	SPLIT,
 	HEAT,
+	COOL,
 	DETECT,
+	TRANSFER_IN,
+	TRANSFER_OUT,
 	STORAGE
 }

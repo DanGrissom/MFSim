@@ -24,6 +24,8 @@
  * ---		----		----													*
  * FML		MM/DD/YY	One-line description									*
  *-----------------------------------------------------------------------------*/
+#include "../../Headers/Testing/biocode_test.h"
+#include "../../Headers/Models/compiled_cfg.h"
 #include "../../Headers/Testing/test.h"
 #include "../../Headers/Models/min_cost_max_flow_graph.h"
 #include "../../Headers/Util/sort.h"
@@ -44,6 +46,52 @@
 #include "../../Headers/PinMapper/indiv_addr_pin_mapper.h"
 #include "../../Headers/PinMapper/grissom_fppc_pin_mapper.h"
 #include "../../Headers/Testing/pin_constrained_pin_mapping_test_generator.h"
+
+///////////////////////////////////////////////////////////////////////////
+// An empty method for you (me, who?) to write your own code in a clean,
+// contained method for trying out specific cases.
+///////////////////////////////////////////////////////////////////////////
+void Test::MySandboxCode()
+{
+
+}
+
+///////////////////////////////////////////////////////////////////////////
+// This method contains two broken test cases that will be debugged and fixed
+// by Brett Arnold (APU) - July 2017.
+///////////////////////////////////////////////////////////////////////////
+void Test::BrokenCFGsForBrett(int testNum)
+{
+	// Create CFG/Synthesis variables
+	Synthesis *synthesisEngine = NULL;
+	CFG *cfg = NULL;
+
+	// Create CFG; create synthesis engine with pre-set DMFB architecture and configurations
+	if (testNum == 1)
+	{
+		synthesisEngine = Synthesis::CreateNewSynthesisEngine("Assays/CFGs/Broken_Cases/MorphineELISA/ArchFile/Arch_15_19_SampleReagent.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
+		cfg = FileIn::ReadCfgFromFile("Assays/CFGs/Broken_Cases/MorphineELISA/MorphineELISA.cfg");
+	}
+	else if (testNum == 2)
+	{
+		synthesisEngine = Synthesis::CreateNewSynthesisEngine("Assays/CFGs/Broken_Cases/PCRDropletReplace/ArchFile/Arch_15_19_SampleReagent2.txt", LIST_S, GRISSOM_LE_B, ROY_MAZE_R, false, GRISSOM_FIX_0_RA, INDIVADDR_PM, PATH_FINDER_WR, BEG_COMP, FIXED_PE, ALL_EX, 2, 1, 3, 3);
+		cfg = FileIn::ReadCfgFromFile("Assays/CFGs/Broken_Cases/PCRDropletReplace/PCRDropletReplacement.cfg");
+	}
+	else
+		claim(false, "Unknown test-case number for BrokenCFGsForBrett() demo.");
+
+	// Output the graph
+	cfg->OutputGraphFile(cfg->getName(), true, true, true);
+
+	// Compile and execute the CFG
+	CompiledCFG *compiledCFG = new CompiledCFG(synthesisEngine, cfg);
+	compiledCFG->execute();
+	compiledCFG->outputSimulationFiles();
+
+	// Cleanup
+	delete compiledCFG;
+	delete cfg;
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // This test runs commands used for the 2014 Integration VLSI Journal
@@ -82,7 +130,7 @@ void Test::ZachVlsiJournal2014Experiments()
 	Synthesis::Place("Output/1_SCHED_to_PLACE.txt", "Output/2_PLACE_to_ROUTE.txt", pt, minCellsBetweenIrMods);
 	Synthesis::Route("Output/2_PLACE_to_ROUTE.txt", ROY_MAZE_R, false, BEG_COMP, pet, SIM_EX);
 	Synthesis::WireRoute("Output/3_ROUTE_to_SIM.txt", PIN_MAPPER_INHERENT_WR, 3, 3); // Call wire-routing here if you'd like
-	
+
 	cout << endl << endl << "Exiting." << endl;
 }
 
@@ -398,8 +446,8 @@ DAG *Test::Create_B1_PCRMix(double mult, int repeat)
 		dag->ParentChild(M7, O1);
 	}
 
-    cout << "Bench1_PCRMix CREATED" << endl;
-    return dag;
+	cout << "Bench1_PCRMix CREATED" << endl;
+	return dag;
 
 }
 
@@ -1206,7 +1254,7 @@ void Test::DAC2014RecoveryDagGenerator(string inputDagFile, string inputArchFile
 
 	///////////////////////////////////////////////////////////////////////////////////////
 	// Output the initial base graph
- 	string dagBaseName = errorDag->name;
+	string dagBaseName = errorDag->name;
 	DAG *schedRecoveryDag = FileIn::ReadDagFromFile(inputDagFile);
 	string recoveryFileName = outputFolder + dagBaseName + recoveryPrefix + "0.txt";
 	FileOut::WriteDagToFile(schedRecoveryDag, recoveryFileName);
@@ -1338,7 +1386,7 @@ void Test::DAC2014RecoveryDagGenerator(string inputDagFile, string inputArchFile
 
 				// Checks if already executed based off when error occured
 				if ( (schedNode->GetType() != DISPENSE  && ((schedNode->GetEndTS() <= schedError->GetEndTS())  ||  (schedNode->GetStartTS() < schedError->GetEndTS() && schedNode->GetEndTS() >= schedError->GetEndTS()))) ||
-					(schedNode->GetType() == DISPENSE && (schedNode->GetEndTS() < schedError->GetEndTS()))   )
+						(schedNode->GetType() == DISPENSE && (schedNode->GetEndTS() < schedError->GetEndTS()))   )
 
 				{
 					//cout << "\tExecuted: " << schedNode->GetName() << endl;
@@ -1884,57 +1932,19 @@ void Test::MainSandboxCode()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Contains the main demonstration code for Calvin and Skyler's routing-
-// based synthesis implementation. This will eventually be moved to the
-// Demo class once it has been published.
+// This method demonstrates how file I/O can be performed for CFGs
 ///////////////////////////////////////////////////////////////////////////
-void Test::RoutingBasedSynthesis(bool performWash, CommonBenchmarkType benchmark)
+void Test::CFGFileIOTest()
 {
-	////////////////////////////////////////////////////////////////////////////
-	// Synthesis Variables
-	////////////////////////////////////////////////////////////////////////////
-	int maxDropsPerStorageMod = 2;
-	int minCellsBetweenIrMods = 1;
-	int numHorizTracks = 3;
-	int numVertTracks = 3;
+	// Create random CFG to test File I/O
+	CFG *cfg = BiocodeTest::Create_Conditional_B3_Protein_FaultTolerant_CFG(1, 1, 1, false);			// LS Pass; LEB Pass; RMR-R Pass (Merge cases)
 
-	////////////////////////////////////////////////////////////////////////////
-	// Entire SkyCal Synthesis Flow Tests
-	////////////////////////////////////////////////////////////////////////////
-	switch (benchmark)
-	{
-		case PCR_BM:
-			Synthesis::EntireFlow("Assays/B1/MixSplit/PCR.txt", "DmfbArchs/IndividuallyAddressable/B1/Arch_15_19_B1.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
-			break;
-		case IN_VITRO_1_BM:
-			Synthesis::EntireFlow("Assays/B2/InVitro_Ex1_2s_2r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
-			break;
-		case IN_VITRO_2_BM:
-			Synthesis::EntireFlow("Assays/B2/InVitro_Ex2_2s_3r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
-			break;
-		case IN_VITRO_3_BM:
-			Synthesis::EntireFlow("Assays/B2/InVitro_Ex3_3s_3r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
-			break;
-		case IN_VITRO_4_BM:
-			Synthesis::EntireFlow("Assays/B2/InVitro_Ex4_3s_4r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
-			break;
-		case IN_VITRO_5_BM:
-			Synthesis::EntireFlow("Assays/B2/InVitro_Ex5_4s_4r.txt", "DmfbArchs/IndividuallyAddressable/B2/Arch_15_19_B2.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
-			break;
-		case PROTEIN_SPLIT_1_BM:
-			Synthesis::EntireFlow("Assays/B4/MixSplit/ProteinSplit_01_Eq.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
-			break;
-		case PROTEIN_SPLIT_2_BM:
-			Synthesis::EntireFlow("Assays/B4/MixSplit/ProteinSplit_02_Eq.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
-			break;
-		case PROTEIN_SPLIT_3_BM:
-			Synthesis::EntireFlow("Assays/B4/MixSplit/ProteinSplit_03_Eq.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
-			break;
-		case PROTEIN_BM:
-			Synthesis::EntireFlow("Assays/B3/MixSplit/Protein.txt", "DmfbArchs/IndividuallyAddressable/B3and4/Arch_15_19_B3.txt", ROUTING_BASED_SYNTHESIS_S, ROUTING_BASED_SYNTHESIS_P, ROUTING_BASED_SYNTHESIS_R, performWash, GRISSOM_FIX_1_RA, INDIVADDR_PM, PATH_FINDER_WR, INHERENT_COMP, FIXED_PE, ALL_EX, maxDropsPerStorageMod, minCellsBetweenIrMods, numHorizTracks, numVertTracks);
-			break;
-		default:
-			claim(false, "Unknown benchmark not currently implemented into the FieldProgrammablePinConstrainedDMFB() demo.");
-			return;
-	}
+	// Testing CFG file I/O methods
+	FileOut::WriteCfgToFile(cfg, "Test/", cfg->getName() + ".cfg");
+	CFG *cfgIn = FileIn::ReadCfgFromFile("Test/" +  cfg->getName() + ".cfg");
+	CFG *cfgIn2 = FileIn::ReadCfgFromFile("Assays/CFGs/Create_Conditional_Demo_CFG/BC_Conditional_CFG.cfg");
+
+	delete cfgIn2;
+	delete cfgIn;
+	delete cfg;
 }

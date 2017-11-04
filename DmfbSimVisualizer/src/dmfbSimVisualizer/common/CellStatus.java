@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------*
- *                       (c)2014, All Rights Reserved.     						*
+ *                       (c)2016, All Rights Reserved.     						*
  *       ___           ___           ___     									*
  *      /__/\         /  /\         /  /\    									*
  *      \  \:\       /  /:/        /  /::\   									*
@@ -80,6 +80,10 @@ public class CellStatus {
 			return Color.MAGENTA;
 		else if (status.contains("D_OUT"))
 			return Color.GREEN;
+		else if (status.contains("D_TRANS_OUT"))
+			return Color.GREEN;
+		else if (status.contains("D_TRANS_IN") || status.contains("D_TRANS_IN_MERGE"))
+			return Color.BLUE;
 		else if (status.contains("D_PROC_WAIT"))
 			return Color.RED;
 		else if (status.contains("D_WASH"))

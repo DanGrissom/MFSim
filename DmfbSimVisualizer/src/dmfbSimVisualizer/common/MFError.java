@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------*
- *                       (c)2014, All Rights Reserved.     						*
+ *                       (c)2016, All Rights Reserved.     						*
  *       ___           ___           ___     									*
  *      /__/\         /  /\         /  /\    									*
  *      \  \:\       /  /:/        /  /::\   									*
@@ -46,6 +46,6 @@ public class MFError {
 	//////////////////////////////////////////////////////////////////////////////////////
 	public static void DisplayError(String error)
 	{
-		JOptionPane.showMessageDialog(null, error, "DMFB Controller Error", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(null, error, "DMFB Simulator Visualization Error", JOptionPane.ERROR_MESSAGE);
 	}
 }
